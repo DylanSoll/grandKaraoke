@@ -1,20 +1,25 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {styles} from './static/styles/mainStyle'
+import {Component} from 'react'
+window.newVar = "test"
 
 export default function App() {
+  const handleLogin = () => console.log("Text pressed")
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+        <SafeAreaView style={styles.safeAreaView}>
+          <Text style={styles.pageHeading} onPress = {()=>{console.log(window.newVar)}}>{"\n"}Login</Text>
+        
+          <Text style={styles.text}>{"\n"}Email</Text>
+          <TextInput style = {styles.input} onChangeText={(text)=> {console.log(text)}} nativeID={'emailLogin'} />
+
+          <Text style={styles.text}>{"\n"}Password</Text>
+          <TextInput style = {styles.input} onChangeText={(text)=> {console.log(text)}} nativeID={'passwordLogin'}
+          secureTextEntry={true}/>
+          <Button title="Login" onPress={handleLogin} style={styles.buttonPrimary}/>
+          <StatusBar style="auto" />
+        </SafeAreaView>
+
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
