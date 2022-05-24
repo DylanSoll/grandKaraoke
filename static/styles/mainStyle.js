@@ -41,6 +41,7 @@ export const styles = StyleSheet.create({
         borderRadius: '10vh',
         borderColor: 'grey',
         borderWidth: '1vh',
+        color: sSC.textColour,
     },
     pageHeading: {
       fontSize: '35pt',
@@ -48,9 +49,8 @@ export const styles = StyleSheet.create({
       justifyContent: 'start',
     },
     buttonPrimary: {
-      //backgroundColor: sSC.primaryColour,
+      backgroundColor: sSC.primaryColour,
       color: sSC.textColour,
-      backgroundColor: 'grey',
     }
 
   });
