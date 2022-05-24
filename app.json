@@ -28,6 +28,8 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": "This is the karaoke app we are developing for an assignment",
+    "githubUrl": "https://github.com/DylanSoll/grandKaraoke"
   }
 }

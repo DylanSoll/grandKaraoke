@@ -1,6 +1,6 @@
 "use strict"
 
-function create_form_data(data){
+export function create_form_data(data){
     const form_data = new FormData(); //create a form object since one does not exist
     const key_array = Object.keys(data); //creates an object of all keys
     key_array.forEach(key => { //iterates through each key
@@ -9,7 +9,7 @@ function create_form_data(data){
     return form_data //returns form data object
  }
 
-function ajax_handler(url, callback=console.log, form_object=null, request_method='POST', async_var = true){
+export function ajax_handler(url, callback=console.log, form_object=null, request_method='POST', async_var = true){
     const XMLhr = new XMLHttpRequest(); //create a request object
 
     XMLhr.open(request_method, url, async_var); //opens a new XMLHttpRequest

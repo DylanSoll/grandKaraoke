@@ -48,8 +48,9 @@ export const styles = StyleSheet.create({
       justifyContent: 'start',
     },
     buttonPrimary: {
-      backgroundColor: sSC.primaryColour,
-      color: sSC.textColour
+      //backgroundColor: sSC.primaryColour,
+      color: sSC.textColour,
+      backgroundColor: 'grey',
     }
 
   });
