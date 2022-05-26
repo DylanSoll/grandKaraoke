@@ -1,0 +1,1 @@
+export const moderateWords = ['fuck', 'cunt', 'shit', 'dick']

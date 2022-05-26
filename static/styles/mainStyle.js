@@ -44,14 +44,16 @@ export const styles = StyleSheet.create({
         color: sSC.textColour,
     },
     pageHeading: {
-      fontSize: '35pt',
+      fontSize: 35,
       color: sSC.textColour,
-      justifyContent: 'start',
     },
-    buttonPrimary: {
-      backgroundColor: sSC.primaryColour,
-      color: sSC.textColour,
-    }
+    navHeader: {
+      backgroundColor: sSC.backgroundColour,
+      borderBottomWidth: '0',
 
+        elevation: 0, // remove shadow on Android
+        shadowOpacity: 0, // remove shadow on iOS
+        borderBottomWidth: 0 // Just in case.
+    }
   });
 
