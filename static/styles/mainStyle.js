@@ -1,4 +1,4 @@
-import {StyleSheet } from 'react-native';
+import {Dimensions, StyleSheet } from 'react-native';
 const styleSheetConstants = {
   'backgroundColour':'#000000', 
   'primaryColour': '#3700CC',
@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     },
     text: {
       color: sSC.textColour,
-      fontSize: '20pt',
+      fontSize: 20,
     },
     safeAreaView: {
         flex: 1,
@@ -34,14 +34,15 @@ export const styles = StyleSheet.create({
         width: '100%',
     },
     input: {
-        width: '90%',
-        height: '5%',
+        width: Dimensions.get('window').width * .90,
+        height: 25,
         backgroundColor: sSC.inputBackgroundColour,
         alignContent: 'center',
-        borderRadius: '10vh',
+        borderRadius: 15,
         borderColor: 'grey',
-        borderWidth: '1vh',
+        borderWidth: 1,
         color: sSC.textColour,
+        padding: 5
     },
     pageHeading: {
       fontSize: 35,
@@ -50,10 +51,15 @@ export const styles = StyleSheet.create({
     navHeader: {
       backgroundColor: sSC.backgroundColour,
       borderBottomWidth: '0',
+      elevation: 0, // remove shadow on Android
+      shadowOpacity: 0, // remove shadow on iOS
+    },
+    label: {
+        color: sSC.textColour,
+        fontSize: 20,
+        paddingBottom: 10,
+        paddingTop: 10
 
-        elevation: 0, // remove shadow on Android
-        shadowOpacity: 0, // remove shadow on iOS
-        borderBottomWidth: 0 // Just in case.
     }
   });
 

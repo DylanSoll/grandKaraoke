@@ -10,36 +10,36 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator} from '@react-navigation/drawer';
 //Custom Components
-import { Register } from './screens/register';
-import { Login } from './screens/login';
-import { CustomDrawer} from './screens/drawerNavigation'
+import { Register } from './components/screens/register';
+import { Login } from './components/screens/login';
+import { CustomDrawer} from './components/navigation/drawerNavigation'
+import { Homepage } from './components/screens/home';
 //const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
-
+navigationScreenOptions={
+  headerShown: true,
+  headerStyle: styles.navHeader,
+  headerTitleStyle: {
+    color: 'white'
+  },
+  drawerActiveBackgroundColor: '#0f0082',
+  drawerActiveTintColor: '#fff',
+  drawerInactiveTintColor: '#fff',
+  drawerLabelStyle: {
+    fontSize: 15,
+  },
+}
 
 export default function App(){
-  const [userid, updateUserID]= useState("");
-  let startRoute = "Login"
   return (
     <NavigationContainer>
+      
       <Drawer.Navigator  drawerContent={props => <CustomDrawer {...props} />}
-      screenOptions={{
-        headerShown: true,
-        headerStyle: styles.navHeader,
-        headerTitleStyle: {
-          color: 'white'
-        },
-        drawerActiveBackgroundColor: '#0f0082',
-        drawerActiveTintColor: '#fff',
-        drawerInactiveTintColor: '#fff',
-        drawerLabelStyle: {
-          fontFamily: 'Roboto-Medium',
-          fontSize: 15,
-        },
-      }}> 
+      screenOptions={navigationScreenOptions} initialRouteName="Register"> 
         <Drawer.Screen name="Login" component={Login} />
         <Drawer.Screen name="Register" component={Register} />
+        <Drawer.Screen name="Home" component={Homepage} />
       </Drawer.Navigator>
     </NavigationContainer>
     
