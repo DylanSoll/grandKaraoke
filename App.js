@@ -13,7 +13,7 @@ import { createDrawerNavigator} from '@react-navigation/drawer';
 import { Register } from './components/screens/register';
 import { Login } from './components/screens/login';
 import { CustomDrawer} from './components/navigation/drawerNavigation'
-import { Homepage } from './components/screens/home';
+import { CreateEvent, KeyboardAvoidingComponent } from './components/screens/CreateEvent';
 //const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -39,7 +39,6 @@ export default function App(){
       screenOptions={navigationScreenOptions} initialRouteName="Register"> 
         <Drawer.Screen name="Login" component={Login} />
         <Drawer.Screen name="Register" component={Register} />
-        <Drawer.Screen name="Home" component={Homepage} />
       </Drawer.Navigator>
     </NavigationContainer>
     
