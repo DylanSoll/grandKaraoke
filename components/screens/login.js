@@ -1,35 +1,54 @@
 import { StatusBar } from 'expo-status-bar';
-import { Button, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, SafeAreaView, StyleSheet, Text, TextInput, View, Keyboard, ScrollView } from 'react-native';
 import { styles } from '../../static/styles/mainStyle';
 import {Component, useState} from 'react'
-import {tryLogin} from '../../static/js/loginRegisterScripts'
+import {validateLoginDetails, tryLogin, checkEmailForColourChange, checkPasswordForColourChange} from '../../static/js/loginRegisterScripts'
 import Spinner from 'react-native-loading-spinner-overlay';
-
+import CustomButton from '../customElements/customButton';
 export function Login({navigation}){
     const [email, updateEmail]= useState("")
     const [password, updatePassword]= useState("")
-    const [spinnerWheel, updateWheel] = useState(false) 
+    const [disableLoginButton, updateAllowLogin] = useState(true)
+    const [validEmailState, updateEmailState] = useState('#353535')
+    const [validPasswordState, updatePasswordState] = useState('#353535')
 
     return(
-      <SafeAreaView style={styles.safeAreaView}>
+      <SafeAreaView style={styles.safeAreaView} onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={{ justifyContent: "space-around"}}>
         <Spinner
             visible={false}
             textContent={'Logging In'}
             textStyle={{color: 'white'}}
             animation = "slide"
           />
-        <Text style={styles.pageHeading} onPress = {()=>{console.log(window.newVar)}}>{"\n"}Login</Text>
-    
-        <Text style={styles.text}>{"\n"}Email</Text>
-        <TextInput style = {styles.input} onChangeText={(emailInput)=> {updateEmail(emailInput)}}  />
-    
-        <Text style={styles.text}>{"\n"}Password</Text>
-        <TextInput style = {styles.input} onChangeText={(passwordInput)=> {updatePassword(passwordInput)}}
+        <View style={{alignSelf: 'center'}}>
+          <Text style={styles.text}>{"\n"}Email</Text>
+        </View>
+
+        
+        <TextInput style = {[styles.input, {backgroundColor:validEmailState}]} onChangeText={(emailInput)=> {
+          updateEmail(emailInput);
+          updateEmailState(checkEmailForColourChange(emailInput));
+          updateAllowLogin(! validateLoginDetails(email, password));
+          }}  />
+        <View style={{alignSelf: 'center'}}>
+          <Text style={styles.text}>{"\n"}Password</Text>
+        </View>
+        
+        <TextInput style = {[styles.input, {backgroundColor:validPasswordState}]}onChangeText={(passwordInput)=> {
+          updatePassword(passwordInput);
+          updatePasswordState(checkPasswordForColourChange(passwordInput));
+
+          updateAllowLogin(! validateLoginDetails(email, password));
+        }}
         secureTextEntry={true}/>
-        <Button title="Login" onPress={()=>{updateWheel(true)/*tryLogin(email, password)*/}} style={styles.buttonPrimary}/>
-        <Button title = "Register Instead"  style = {styles.buttonSmall}
-        onPress={()=>(navigation.navigate('Register'))}/>
+
+        <CustomButton onPress={()=>(tryLogin(email, password))} label={"Login"} disabled = {disableLoginButton} fontSize={22.5}/>
+        <CustomButton onPress={()=>(navigation.navigate('Register'))} label={"Register Instead"} fontSize={15}/>
+
+
         <StatusBar style="auto" />
+        </ScrollView>
     </SafeAreaView>
     )
   }

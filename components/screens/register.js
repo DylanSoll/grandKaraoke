@@ -1,70 +1,91 @@
-import { StatusBar } from 'expo-status-bar';
-import { Button, SafeAreaView, StyleSheet, Text, TextInput, Touchable, View, Modal, KeyboardAvoidingView, Keyboard } from 'react-native';
+import { Button, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { styles } from '../../static/styles/mainStyle';
-import {Component, useState} from 'react'
+import {useState} from 'react'
 import { ScrollView } from 'react-native-gesture-handler';
+import CustomButton from '../customElements/customButton';
+import { validateRegisterDetails,tryRegister, 
+  checkRegEmailForColourChange, checkUsernameForColourChange, matchEmailForColourChange, matchPasswordForColourChange, checkRegPasswordForColourChange 
+} from '../../static/js/loginRegisterScripts';
 export function Register({navigation}){
-    const [email, updateEmail] = useState("")
-    const [confirmEmail, updateConfirmEmail] = useState("")
-    const [password, updatePassword] = useState("")
-    const [confirmPassowrd, updateConfirmPassword] = useState("")
-    return(
-        <SafeAreaView style={styles.safeAreaView} onPress={Keyboard.dismiss}>
-          <ScrollView style={{marginHorizontal: 20}}>
+  const [username, updateUsername] = useState("")
+  const [email, updateEmail] = useState("")
+  const [confirmEmail, updateConfirmEmail] = useState("")
+  const [password, updatePassword] = useState("")
+  const [confirmPassword, updateConfirmPassword] = useState("")
 
+  const [validUsername, updateValidUsername] = useState("#353535")
+  const [validEmail, updateValidEmail] = useState("#353535")
+  const [validConfirmEmail, updateValidConfirmEmaill] = useState("#353535")
+  const [validPassword, updateValidPassword] = useState("#353535")
+  const [validConfirmPassword, updateValidConfirmPassword] = useState("#353535")
 
-          <KeyboardAvoidingView style={styles.safeAreaView}
-          behavior={Platform.OS === "ios" ? "paddingBottom" : "height"}>
-            <Text style={styles.label}>Username</Text>
-            <TextInput onChangeText={(email) => {updateEmail(email)}} style = {styles.input}></TextInput>
-
-            <Text>{"\n"}</Text> 
-            <Text style={styles.label}>Email</Text>
-            <TextInput onChangeText={(email) => {updateEmail(email)}} style = {styles.input}></TextInput>
-            
+  const [allowRegister, updateRegister] = useState(true)
+  return(
+      <SafeAreaView style={styles.safeAreaView} onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView>
+          <ScrollView automaticallyAdjustKeyboardInsets = {true} >
+           <View style={styles.keyboardAvoidingInner}  onPress={Keyboard.dismiss}>
+            <View style={{alignSelf: 'center'}}>
+              <Text style={styles.label}>Username</Text>
+            </View>
           
-            <Text style={styles.label}>Confirm Email</Text>
-            <TextInput onChangeText={(confirmEmail) => {updateConfirmEmail(confirmEmail)}} style = {styles.input}></TextInput>
+            <TextInput onChangeText={(inputUsername) => {
+              updateUsername(inputUsername);
+              updateValidUsername(checkUsernameForColourChange(inputUsername));
+
+              updateRegister(! validateRegisterDetails(username, email, confirmEmail, password, confirmPassword));
+              }} style = {[styles.input, {backgroundColor:validUsername}]}></TextInput>
+
+            <View style={{alignSelf: 'center'}}>
+              <Text style={styles.label}>{"\n"}Email</Text>
+            </View>
+            <TextInput onChangeText={(inputEmail) => {
+              updateEmail(inputEmail);
+              updateValidEmail(checkRegEmailForColourChange(inputEmail));
+              updateValidConfirmEmaill(matchEmailForColourChange(inputEmail, confirmEmail));
+              updateRegister(! validateRegisterDetails(username, email, confirmEmail, password, confirmPassword));}} 
+              style = {[styles.input, {backgroundColor:validEmail}]}></TextInput>
             
-            <Text>{"\n"}</Text>
+            <View style={{alignSelf: 'center'}}>
+              <Text style={styles.label}>Confirm Email</Text>
 
-            <Text style={styles.label}>Password</Text>
-            <TextInput onChangeText={(password) => {updatePassword(password)}} style = {styles.input}></TextInput>
-
-
-            <Text style={styles.label}>Confirm Password</Text>
-            <TextInput onChangeText={(confirmPassword) => {confirmPassword(confirmPassword)}} style = {styles.input}></TextInput>
+            </View>
+            <TextInput onChangeText={(inputConfirmEmail) => {
+              updateConfirmEmail(inputConfirmEmail);
+              updateValidEmail(checkRegEmailForColourChange(email));
+              updateValidConfirmEmaill(matchEmailForColourChange(email, inputConfirmEmail));
+              updateRegister(! validateRegisterDetails(username, email, confirmEmail, password, confirmPassword));
+              }} style = {[styles.input, {backgroundColor:validConfirmEmail}]}></TextInput>
             
-            <Button title = "Login" onPress={()=>(console.log(email))}/>
-            </KeyboardAvoidingView>
-            </ScrollView>
-        </SafeAreaView>
-    )
-}
-const style = {
-    centeredView: {
-        position: "absolute",
-        flex: 1,
-        justifyContent: "center",
-        marginTop: 22,
-        top: '50%',
-        width: 100,
-        height: 100,
-        backgroundColor: 'white'
-      },
-      modalView: {
-        margin: 20,
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 35,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5
-      },
+            <View style={{alignSelf: 'center'}}>
+              <Text style={styles.label}>{"\n"}Password</Text>
+            </View>
+            <TextInput onChangeText={(inputPassword) => {
+              updatePassword(inputPassword);
+              updateValidPassword(checkRegPasswordForColourChange(inputPassword));
+              updateValidConfirmPassword(matchPasswordForColourChange(inputPassword, confirmPassword));
+              updateRegister(validateRegisterDetails(username, email, confirmEmail, password, confirmPassword));
+              }} style = {[styles.input, {backgroundColor:validPassword}]}></TextInput>
+
+            <View style={{alignSelf: 'center'}}>
+              <Text style={styles.label}>Confirm Password</Text>
+            </View>
+              
+            <TextInput onChangeText={(inputConfirmPassword) => {
+              updateConfirmPassword(inputConfirmPassword);
+              updateValidPassword(checkRegPasswordForColourChange(password));
+              updateValidConfirmPassword(matchPasswordForColourChange(password, inputConfirmPassword));
+              updateRegister(validateRegisterDetails(username, email, confirmEmail, password, confirmPassword));
+              }} style = {[styles.input, {backgroundColor:validConfirmPassword}]}></TextInput>
+
+            <CustomButton onPress={()=>{
+              console.log(tryRegister(username, email, confirmEmail, password, confirmPassword));
+            }} label={"Register"} disabled = {allowRegister} fontSize={22.5}/>
+            <CustomButton onPress={()=>(navigation.navigate('Login'))} label={"Login"} fontSize={15}/>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+    </SafeAreaView>
+  )
 }
