@@ -21,6 +21,11 @@ export const styles = StyleSheet.create({
       justifyContent: 'center',
       color: sSC.textColour,
     },
+    keyboardAvoidingInner: {
+      padding: 24,
+      flex: 1,
+      justifyContent: "space-around",
+    },
     text: {
       color: sSC.textColour,
       fontSize: 20,
@@ -35,14 +40,15 @@ export const styles = StyleSheet.create({
     },
     input: {
         width: Dimensions.get('window').width * .90,
-        height: 25,
+        height: 35,
         backgroundColor: sSC.inputBackgroundColour,
         alignContent: 'center',
         borderRadius: 15,
         borderColor: 'grey',
         borderWidth: 1,
         color: sSC.textColour,
-        padding: 5
+        padding: 5,
+        fontSize: 20
     },
     pageHeading: {
       fontSize: 35,
@@ -60,6 +66,16 @@ export const styles = StyleSheet.create({
         paddingBottom: 10,
         paddingTop: 10
 
+    },
+    button: {
+      backgroundColor: sSC.primaryColour,
+      padding: 5,
+      paddingLeft: 10,
+      paddingRight: 10,
+      borderRadius: 10,
+      textAlign: "center",
+      alignSelf: "center",
+      margin: 5
     }
   });
 
