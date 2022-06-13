@@ -35,11 +35,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   resultContainer: {
-    position: "absolute",
-    borderColor: 'black',
-    width: '100%',
-    borderWidth: 2,
+    position: "relative",
+    width: Dimensions.get('window').width ,
     flexDirection: "row",
+    margin: 7
     
   }, trackName:{
     fontSize: 18,

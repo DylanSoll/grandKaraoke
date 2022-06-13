@@ -64,7 +64,7 @@ export function Register({navigation}){
               updatePassword(inputPassword);
               updateValidPassword(checkRegPasswordForColourChange(inputPassword));
               updateValidConfirmPassword(matchPasswordForColourChange(inputPassword, confirmPassword));
-              updateRegister(validateRegisterDetails(username, email, confirmEmail, password, confirmPassword));
+              updateRegister(! validateRegisterDetails(username, email, confirmEmail, password, confirmPassword));
               }} style = {[styles.input, {backgroundColor:validPassword}]}></TextInput>
 
             <View style={{alignSelf: 'center'}}>
@@ -75,13 +75,13 @@ export function Register({navigation}){
               updateConfirmPassword(inputConfirmPassword);
               updateValidPassword(checkRegPasswordForColourChange(password));
               updateValidConfirmPassword(matchPasswordForColourChange(password, inputConfirmPassword));
-              updateRegister(validateRegisterDetails(username, email, confirmEmail, password, confirmPassword));
+              updateRegister(! validateRegisterDetails(username, email, confirmEmail, password, confirmPassword));
               }} style = {[styles.input, {backgroundColor:validConfirmPassword}]}></TextInput>
 
             <CustomButton onPress={()=>{
               console.log(tryRegister(username, email, confirmEmail, password, confirmPassword));
             }} label={"Register"} disabled = {allowRegister} fontSize={22.5}/>
-            <CustomButton onPress={()=>(navigation.navigate('Login'))} label={"Login"} fontSize={15}/>
+            <CustomButton onPress={()=>(navigation.navigate('Login'))} label={"Login Instead"} fontSize={15}/>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

@@ -1,52 +1,45 @@
 import React from 'react';
-import { View, KeyboardAvoidingView, TextInput, StyleSheet, Text, Platform, TouchableWithoutFeedback, Button, Keyboard  } from 'react-native';
+import { View, KeyboardAvoidingView, TextInput, StyleSheet, Text, Platform, Button, Keyboard, SafeAreaView, ScrollView } from 'react-native';
 import {styles} from '../../static/styles/mainStyle'
+import CustomButton from '../customElements/customButton';
 export function CreateEvent({navigation}){
   return(
       <SafeAreaView style={styles.safeAreaView} onPress={Keyboard.dismiss}>
-        
+        <KeyboardAvoidingView>
+          <ScrollView>
+            <View style={styles.keyboardAvoidingInner}>
+              <View style={{alignSelf: 'center'}}>
+                <Text style={styles.label}>Event Name</Text>
+              </View>
 
-        <KeyboardAvoidingView
-    behavior={Platform.OS === "ios" ? "padding" : "height"+100}
-    style={{flex:1}}
-  >
-    <ScrollView>
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.keyboardAvoidingInner}>
-              <View style={{alignSelf: 'center'}}>
-                <Text style={styles.label}>Username</Text>
-              </View>
-            
-              <TextInput onChangeText={(email) => {updateEmail(email)}} style = {styles.input}></TextInput>
-
-              <View style={{alignSelf: 'center'}}>
-                <Text style={styles.label}>{"\n"}Email</Text>
-              </View>
-              <TextInput onChangeText={(email) => {updateEmail(email)}} style = {styles.input}></TextInput>
-              
-              <View style={{alignSelf: 'center'}}>
-                <Text style={styles.label}>Confirm Email</Text>
-
-              </View>
-              <TextInput onChangeText={(confirmEmail) => {updateConfirmEmail(confirmEmail)}} style = {styles.input}></TextInput>
-              
-              <View style={{alignSelf: 'center'}}>
-                <Text style={styles.label}>{"\n"}Password</Text>
-              </View>
-              <TextInput onChangeText={(password) => {updatePassword(password)}} style = {styles.input}></TextInput>
-
-              <View style={{alignSelf: 'center'}}>
-                <Text style={styles.label}>Confirm Password</Text>
-              </View>
-              
-              <TextInput onChangeText={(confirmPassword) => {updateConfirmPassword(confirmPassword)}} style = {styles.input}></TextInput>
-              
-              <Button title = "Register" onPress={()=>(console.log(email))}/>
-              <Button title = "Login Instead" onPress={()=>(navigation.navigate('Login'))}/>
-      </View>
-    </TouchableWithoutFeedback>
-    </ScrollView>
-  </KeyboardAvoidingView>
+              <DatePicker
+            style={styles.datePickerStyle}
+            date={date}
+            mode="date"
+            placeholder="select date"
+            format="DD-MM-YYYY"
+            minDate="01-01-2016"
+            maxDate="01-01-20900"
+            confirmBtnText="Confirm"
+            cancelBtnText="Cancel"
+            customStyles={{
+              dateIcon: {
+                //display: 'none',
+                position: 'absolute',
+                left: 0,
+                top: 4,
+                marginLeft: 0,
+              },
+              dateInput: {
+                marginLeft: 36,
+              },
+            }}
+          />              
+              <CustomButton label = {"Create Event"} onPress={()=>{console.log('create')}} disabled = {true} fontSize={20}/>
+              <CustomButton label = {"Clear"} onPress={()=>{console.log('Clear')}}/>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
 
       </SafeAreaView>
       

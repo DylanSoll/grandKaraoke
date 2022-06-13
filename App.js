@@ -10,10 +10,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator} from '@react-navigation/drawer';
 //Custom Components
+import { CustomDrawer} from './components/navigation/drawerNavigation'
+
+
 import { Register } from './components/screens/register';
 import { Login } from './components/screens/login';
-import { CustomDrawer} from './components/navigation/drawerNavigation'
-import { CreateEvent, KeyboardAvoidingComponent } from './components/screens/CreateEvent';
+import { CreateEvent } from './components/screens/CreateEvent';
+import {SearchForSongs} from './components/screens/songSearch'
 //const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -36,9 +39,11 @@ export default function App(){
     <NavigationContainer>
       
       <Drawer.Navigator  drawerContent={props => <CustomDrawer {...props} />}
-      screenOptions={navigationScreenOptions} initialRouteName="Register"> 
+      screenOptions={navigationScreenOptions} initialRouteName="Song Search"> 
         <Drawer.Screen name="Login" component={Login} />
         <Drawer.Screen name="Register" component={Register} />
+        <Drawer.Screen name ="Create Event" component={CreateEvent} />
+        <Drawer.Screen name = "Song Search" component={SearchForSongs} />
       </Drawer.Navigator>
     </NavigationContainer>
     

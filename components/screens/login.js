@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { Button, SafeAreaView, StyleSheet, Text, TextInput, View, Keyboard, ScrollView } from 'react-native';
 import { styles } from '../../static/styles/mainStyle';
-import {Component, useState} from 'react'
+import { useState} from 'react'
 import {validateLoginDetails, tryLogin, checkEmailForColourChange, checkPasswordForColourChange} from '../../static/js/loginRegisterScripts'
 import Spinner from 'react-native-loading-spinner-overlay';
 import CustomButton from '../customElements/customButton';
