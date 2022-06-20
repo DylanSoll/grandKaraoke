@@ -1,22 +1,28 @@
 import React from 'react';
-import { Text, View, StyleSheet, Image, Dimensions} from 'react-native';
+import { Text, View, StyleSheet, Image, Dimensions, TouchableWithoutFeedback} from 'react-native';
 import Constants from 'expo-constants';
+
+// import Sound from 'react-native-audio';
+// Sound.setCategory('Playback')
 
 export function SongContainer(props) {
   return (
-    <View style={styles.resultContainer} >
+    
+    <TouchableWithoutFeedback>
+      <View style={styles.resultContainer}>
+      
         <View style = {styles.imageContainer}>
-        <Image source={{
-          uri: props.source,
-        }} style={{width:64, height: 64}}/>
+          <Image source={{
+            uri: props.source,
+          }} style={{width:64, height: 64}}/>
         </View>
         <View style = {styles.detailsContainer}>
           <Text style={styles.trackName} numberOfLines={1}>{props.trackName}</Text>
           <Text style={styles.artists} numberOfLines={1}>{props.artists}</Text>
           <Text style={styles.albumName} numberOfLines={1}>{props.albumName}</Text>
         </View>
-        
       </View>
+    </TouchableWithoutFeedback>
   );
 }
 

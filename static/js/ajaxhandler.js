@@ -27,3 +27,27 @@ export function ajax_handler(url, callback=console.log, form_object=null, reques
     XMLhr.send(form_object); //send the form data
 }
 
+const API_KEY = 'badc7baeeamsh7de16dfafae2bf6p1b8019jsn3188359ba6cf';
+
+export function communicateWithSpotify(slug, params, callback){
+  const xhr = new XMLHttpRequest();
+  xhr.withCredentials = true;
+
+  xhr.addEventListener("readystatechange", function () {
+    if (this.readyState === this.DONE) {
+      callback(JSON.parse(this.responseText));
+    }
+  });
+	let stringParams = "";
+  let prefix = '?';
+  Object.keys(params).forEach(key => {
+    stringParams += `${prefix}${key}=${params[key]}`;
+    prefix = '&';
+  })
+  xhr.open("GET", `https://spotify23.p.rapidapi.com/${slug}/${stringParams}`);
+  xhr.setRequestHeader("X-RapidAPI-Key", API_KEY);
+  xhr.setRequestHeader("X-RapidAPI-Host", "spotify23.p.rapidapi.com");
+
+  xhr.send(); 
+	return
+}

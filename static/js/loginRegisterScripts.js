@@ -203,7 +203,7 @@ export function tryLogin(email, password){
 
 export function tryRegister(username, email, confirmEmail, password, confirmPassword){
 
-  if (validateUsername(username) === false) return [false, 'username']
+  if (validateUsername(username) === false) return [false, 'username'] 
 
   if (matchStrings(email, confirmEmail) === false) return [false, 'emails dont match']
 
@@ -220,4 +220,3 @@ export function tryRegister(username, email, confirmEmail, password, confirmPass
   ajax_handler('http://dylansoll.pythonanywhere.com/register', console.log, registerForm);
   return true
 }
-

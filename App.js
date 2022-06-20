@@ -16,7 +16,7 @@ import { CustomDrawer} from './components/navigation/drawerNavigation'
 import { Register } from './components/screens/register';
 import { Login } from './components/screens/login';
 import { CreateEvent } from './components/screens/CreateEvent';
-import {SearchForSongs} from './components/screens/songSearch'
+import {SearchForSongs} from './components/screens/songSearch';
 //const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
