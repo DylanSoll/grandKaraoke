@@ -1,15 +1,16 @@
 "use strict"
 import {React, useState} from 'react';
 
-import { View,TextInput, StyleSheet, Text, Keyboard, SafeAreaView, FlatList, Dimensions, Modal } from 'react-native';
+import { View,TextInput, StyleSheet, Text, Keyboard, SafeAreaView, FlatList, Dimensions, Modal, ActivityIndicator } from 'react-native';
 import { ajax_handler, create_form_data, communicateWithSpotify } from '../../static/js/ajaxhandler';
+import * as Speech from 'expo-speech'
 
 import {styles} from '../../static/styles/mainStyle'
 import CustomButton from '../customElements/customButton';
 import { SongContainer } from '../customElements/songResultContainer';
-import { LyricsModal } from '../customElements/lyricsModal';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
-
+import Spinner from 'react-native-loading-spinner-overlay';
+import { TouchableWithoutFeedback, TouchableHighlight } from 'react-native-gesture-handler';
+let currentTrackID = null
 function simplifySearchResponse(data){
     const trackItems = data.tracks.items;
     let trackData = [];
@@ -20,7 +21,7 @@ function simplifySearchResponse(data){
         const previewURL = track.preview_url;
         const duration = track.duration_ms;
         let artistLists = track.artists.items.map(data => {
-            return data.name;
+            return data.profile.name;
         });
         const artists = artistLists.join(', ')
         const albumName = track.albumOfTrack.name;
@@ -32,7 +33,6 @@ function simplifySearchResponse(data){
     }
     return trackData
 }
-
 export function SearchForSongs({navigation}){
     const [songResults, updateResults] = useState([]);
     const [queryString, updateQuery] = useState('');
@@ -40,45 +40,87 @@ export function SearchForSongs({navigation}){
     const [lyricData, updateLyricsData] = useState(null)
     const [prevOpened, updatePrevOpened] = useState(null)
     const [modalVisible, updateVisibility] = useState(false)
+    const [showActivityIndicator, updateActivityIndicator] = useState(false);
     const handleSearchResponse = data => {
         updateResults(simplifySearchResponse(data));
     };
-    if (lyricData !== null) console.log(lyricData)
     const handleLyricsReturn = (lyricDataInp) => {
         const lyrics = lyricDataInp.lyrics;
         const lines = lyrics.lines.map(data=>{
             return {'words':data.words}
-        })
-        updateLyricsData(lines)
+        });
+
+        let prevOpenedLocal = [];
+        if (prevOpened !== null){
+            prevOpenedLocal = prevOpened;
+            prevOpenedLocal[currentTrackID] = lines;
+        }
+        
+        updatePrevOpened(prevOpenedLocal);
+        //updateActivityIndicator(false);
+        updateLyricsData(lines);
     }
     const handleLyricsRequest = (trackID) => {
-        communicateWithSpotify('track_lyrics', trackID, handleLyricsReturn);
+        if (prevOpened === null){
+            currentTrackID = trackID.id
+            communicateWithSpotify('track_lyrics', trackID, handleLyricsReturn);
+            return
+        }
+        const keys = Object.keys(prevOpened)
+        if (keys.includes(trackID.id)){
+            updateLyricsData(prevOpened[trackID.id]);
+            //updateActivityIndicator(false);
+        }else{
+            currentTrackID = trackID.id
+            communicateWithSpotify('track_lyrics', trackID, handleLyricsReturn);
+        }
     }
+    
   return(
       <SafeAreaView style={styles.safeAreaView} onPress={()=>{console.log('intercept')}}>
+        <Spinner
+            visible={showActivityIndicator}
+            textContent={'Loading Lyrics'}
+            textStyle={{color: 'white'}}
+            animation = "slide"
+          />
         <Modal animationType="slide"
         visible={modalVisible}
         
-        transparent={true}
+        transparent={false}
         style={{justifyContent: 'center', //Centered vertically
         alignItems: 'center', // Centered horizontally
-        flex:1}}
->
-        <View style={{ backgroundColor: 'black', width: '90%', alignSelf: "center", height:'90%', borderRadius: 20, padding: 10, marginTop: '5%'}}>
+        flex:1}}>
+        <View style={{width:'100%', height: '100%', backgroundColor:'black'}}>
+        <SafeAreaView style={{ 
+            backgroundColor: 'black', width: Dimensions.get('screen').width * 0.9, alignSelf: "center", 
+            height:'90%', borderRadius: 20, 
+            marginTop: Dimensions.get('screen').height * 0.05, borderColor: 'grey', borderWidth: 2,
+            }}>
           
           <FlatList data = {lyricData} extraData = {lyricData}
             renderItem={({item})=>{
                     return (
-                        <Text onPress={()=> {
-                            Speech.speak(item.words)
-                        }}
-                        style={{color: 'white', fontSize: 20}}>
-                            {item.words}
-                        </Text>
+                        <TouchableHighlight onPress={()=>{
+                            Speech.volume = 100
+                            Speech.stop();
+                            Speech.VoiceQuality.Enhanced
+                            Speech.speak(item.words);
+                            
+                            console.log('should be speaking')
+                        }}>
+                            
+                            <Text
+                            style={{color: 'white', fontSize: 20, paddingLeft: Dimensions.get('screen').width*0.05,
+                            paddingRight: Dimensions.get('screen').width*0.05, paddingBottom: 10, fontSize: 25}}>
+                                {item.words}
+                            </Text>
+                        </TouchableHighlight>
                     )
                 }
           }/>
           <CustomButton onPress = {()=>{updateVisibility(!modalVisible)}} style={{fontSize: 20, width: '100%'}} label = {'Dismiss'}/>
+        </SafeAreaView>
         </View>
       </Modal>
         <View style={{justifyContent: 'space-between', flexDirection: 'row'}}>
@@ -103,13 +145,17 @@ export function SearchForSongs({navigation}){
         </View>
         <TouchableWithoutFeedback onPress={()=>{
             Keyboard.dismiss()
-            console.log('hitting here')
             }}>
         <FlatList data={songResults} extraData={songResults} style= {{flex: 1}}renderItem={({item, index}) =>{
             return (
                 <TouchableWithoutFeedback onPress = {()=>{
+                    updateActivityIndicator(true);
+                    
                     handleLyricsRequest({'id':item.trackID});
                     updateVisibility(!modalVisible);
+
+                    console.log(showActivityIndicator)
+                    
                     }}>
                     <View style={{width: Dimensions.get('window').width}} >
                         <SongContainer source = {item.source} previewURL = {item.previewURL} 

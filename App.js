@@ -39,10 +39,10 @@ export default function App(){
     <NavigationContainer>
       
       <Drawer.Navigator  drawerContent={props => <CustomDrawer {...props} />}
-      screenOptions={navigationScreenOptions} initialRouteName="Song Search"> 
+      screenOptions={navigationScreenOptions} initialRouteName="Events"> 
         <Drawer.Screen name="Login" component={Login} />
         <Drawer.Screen name="Register" component={Register} />
-        <Drawer.Screen name ="Create Event" component={CreateEvent} />
+        <Drawer.Screen name ="Events" component={CreateEvent} />
         <Drawer.Screen name = "Song Search" component={SearchForSongs} />
       </Drawer.Navigator>
     </NavigationContainer>
