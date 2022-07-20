@@ -50,8 +50,3 @@ export default function App(){
     
   );
 }
-
-/*<Tab.Navigator tabBar={(props) => <MyTabBar {...props} initialRouteName = "Login"/>}>
-        <Tab.Screen name = "Login" component={Login} />
-        <Tab.Screen name="Register" component={Register} />   
-       </Tab.Navigator>*/

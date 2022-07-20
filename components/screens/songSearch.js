@@ -1,7 +1,7 @@
 "use strict"
 import {React, useState} from 'react';
 
-import { View,TextInput, StyleSheet, Text, Keyboard, SafeAreaView, FlatList, Dimensions, Modal, ActivityIndicator } from 'react-native';
+import { View,TextInput, Text, Keyboard, SafeAreaView, FlatList, Dimensions, Modal, Image, Linking, StyleSheet } from 'react-native';
 import { ajax_handler, create_form_data, communicateWithSpotify } from '../../static/js/ajaxhandler';
 import * as Speech from 'expo-speech'
 
@@ -9,7 +9,8 @@ import {styles} from '../../static/styles/mainStyle'
 import CustomButton from '../customElements/customButton';
 import { SongContainer } from '../customElements/songResultContainer';
 import Spinner from 'react-native-loading-spinner-overlay';
-import { TouchableWithoutFeedback, TouchableHighlight } from 'react-native-gesture-handler';
+import { TouchableWithoutFeedback, TouchableHighlight, ScrollView } from 'react-native-gesture-handler';
+import { ExpandedSong } from '../customElements/expandedSong';
 let currentTrackID = null
 function simplifySearchResponse(data){
     const trackItems = data.tracks.items;
@@ -17,7 +18,8 @@ function simplifySearchResponse(data){
     for (let i = 0; i < trackItems.length; i++){
         const track = trackItems[i].data;
         const trackName = track.name;
-        const trackID = track.id
+        const trackURL = track.uri;
+        const trackID = track.id;
         const previewURL = track.preview_url;
         const duration = track.duration_ms;
         let artistLists = track.artists.items.map(data => {
@@ -25,10 +27,11 @@ function simplifySearchResponse(data){
         });
         const artists = artistLists.join(', ')
         const albumName = track.albumOfTrack.name;
+        const albumURL = track.albumOfTrack.uri;
         const albumImage = track.albumOfTrack.coverArt.sources[0].url
         trackData.push(
-            {'trackName': trackName, 'previewURL': previewURL, 'duration': duration,
-            'artists': artists, 'albumName':albumName, 'source': albumImage, 'trackID': trackID}
+            {'trackName': trackName, 'previewURL': previewURL, 'duration': duration, trackURL: trackURL,
+            'artists': artists, 'albumName':albumName, 'source': albumImage, 'trackID': trackID, albumURL: albumURL}
         );
     }
     return trackData
@@ -37,9 +40,11 @@ export function SearchForSongs({navigation}){
     const [songResults, updateResults] = useState([]);
     const [queryString, updateQuery] = useState('');
     const [canSearch, updateCanSearch] = useState(true);
-    const [lyricData, updateLyricsData] = useState(null)
-    const [prevOpened, updatePrevOpened] = useState(null)
-    const [modalVisible, updateVisibility] = useState(false)
+    const [lyricData, updateLyricsData] = useState(null);
+    const [prevOpened, updatePrevOpened] = useState(null);
+    const [modalVisible, updateVisibility] = useState(false);
+    const [songDetailsVisible, updateSongDetailsVisible] = useState(false);
+    const [currentTrackIndex, updateCurrentTrackIndex] = useState(undefined);
     const [showActivityIndicator, updateActivityIndicator] = useState(false);
     const handleSearchResponse = data => {
         updateResults(simplifySearchResponse(data));
@@ -123,6 +128,25 @@ export function SearchForSongs({navigation}){
         </SafeAreaView>
         </View>
       </Modal>
+      <Modal animationType="slide"
+        visible={songDetailsVisible}  
+        transparent={true}
+        style={{justifyContent: 'center', //Centered vertically
+        alignItems: 'center', // Centered horizontally
+        flex:1}}>
+        <View style={{width:'100%', height: '100%', backgroundColor:'black'}}>
+            <SafeAreaView style={{ backgroundColor: 'black',  alignSelf: "center", 
+                borderRadius: 20, borderColor: 'grey', borderWidth: 2,
+                marginTop: Dimensions.get('screen').height * 0.05,height:'90%', width: Dimensions.get('screen').width * 0.9,
+                }}>
+                    <ExpandedSong trackName = {songResults?.currentTrackIndex?.name} artists = "Arists 1, artist 2" albumName = "Album" trackURL = "spotify:track:4WNcduiCmDNfmTEz7JvmLv"
+                    albumURL = "spotify:album:1B68g8b4wpedNDvvQLAoCe"
+                    imageURI = "https://i.scdn.co/image/ab67757000003b822696da150dafe289126bd1ff"/>
+                    
+                <CustomButton onPress = {()=>{updateSongDetailsVisible(false)}} fontSize={20} label = {'Close'}/>
+            </SafeAreaView>
+        </View>
+      </Modal>
         <View style={{justifyContent: 'space-between', flexDirection: 'row'}}>
             <TextInput placeholder='Search...' onChangeText={
                 (query) => {
@@ -132,11 +156,12 @@ export function SearchForSongs({navigation}){
                 }
                 } style={[styles.input, {width: Dimensions.get('window').width * .70, left: 0}]}/>
             <CustomButton label = "Search" onPress = {()=>{
-                let queryStringToParse = queryString.trim().toLowerCase()
-                let spaces = queryStringToParse.match(/[ ]/gmi)
-                let numSpaces = 0
+                Keyboard.dismiss();
+                let queryStringToParse = queryString.trim().toLowerCase();
+                let spaces = queryStringToParse.match(/[ ]/gmi);
+                let numSpaces = 0;
                 if (spaces !== null) {
-                    numSpaces = spaces.length
+                    numSpaces = spaces.length;
                 }
                 const searchData = {'q': queryStringToParse.trim().replace(/[ ]/g, '%20')};
                 communicateWithSpotify('search', searchData, handleSearchResponse);
@@ -148,17 +173,15 @@ export function SearchForSongs({navigation}){
             }}>
         <FlatList data={songResults} extraData={songResults} style= {{flex: 1}}renderItem={({item, index}) =>{
             return (
-                <TouchableWithoutFeedback onPress = {()=>{
-                    updateActivityIndicator(true);
-                    
-                    handleLyricsRequest({'id':item.trackID});
-                    updateVisibility(!modalVisible);
-
-                    console.log(showActivityIndicator)
-                    
-                    }}>
+                <TouchableWithoutFeedback >
                     <View style={{width: Dimensions.get('window').width}} >
                         <SongContainer source = {item.source} previewURL = {item.previewURL} 
+                        showLyrics = {()=>{
+                            updateActivityIndicator(true);
+                            handleLyricsRequest({'id':item.trackID});
+                            updateVisibility(!modalVisible);  
+                            }}
+                        showMore = {()=>{console.log('testing')}}
                         trackName = {item.trackName} artists = {item.artists} albumName = {item.albumName} />
                     </View>
                 </TouchableWithoutFeedback>
@@ -171,8 +194,3 @@ export function SearchForSongs({navigation}){
       
   )
 }
-
-
-//<SongContainer source = {"https://i.scdn.co/image/ab67757000003b822696da150dafe289126bd1ff"}
-//trackName = "Track" artists = "Artists" albumName = "Album" />
-//

@@ -76,6 +76,7 @@ export const styles = StyleSheet.create({
       textAlign: "center",
       alignSelf: "center",
       margin: 5
-    }
+    },
+    text: {color: 'white', textAlign: 'center'},
   });
 

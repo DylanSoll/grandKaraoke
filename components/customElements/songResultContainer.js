@@ -1,45 +1,36 @@
 import React from 'react';
-import { Text, View, StyleSheet, Image, Dimensions, TouchableWithoutFeedback} from 'react-native';
-import Constants from 'expo-constants';
-
-// import Sound from 'react-native-audio';
-// Sound.setCategory('Playback')
+import { Text, View, StyleSheet, Image, Dimensions} from 'react-native';
+import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 export function SongContainer(props) {
   return (
-    
-    <TouchableWithoutFeedback>
-      <View style={styles.resultContainer}>
       
+      <View style={styles.resultContainer}>
         <View style = {styles.imageContainer}>
-          <Image source={{
-            uri: props.source,
-          }} style={{width:64, height: 64}}/>
+          <TouchableWithoutFeedback onPress={props.showMore}>
+            <Image source={{uri: props.source}} style={{width:64, height: 64}}/>
+          </TouchableWithoutFeedback>
         </View>
+
+        
         <View style = {styles.detailsContainer}>
-          <Text style={styles.trackName} numberOfLines={1}>{props.trackName}</Text>
-          <Text style={styles.artists} numberOfLines={1}>{props.artists}</Text>
-          <Text style={styles.albumName} numberOfLines={1}>{props.albumName}</Text>
+          <TouchableWithoutFeedback onPress={props.showMore}>
+            <Text style={styles.trackName} numberOfLines={1}>{props.trackName}</Text>
+            <Text style={styles.artists} numberOfLines={1}>{props.artists}</Text>
+            <Text style={styles.albumName} numberOfLines={1}>{props.albumName}</Text>
+          </TouchableWithoutFeedback>
         </View>
+        <View style={styles.moreInfo} >
+          <TouchableOpacity onPress={props.showLyrics}>
+            <Text style={{color: 'white', fontSize: 30, top: '25%'}}>+</Text>
+          </TouchableOpacity>
+        </View>
+
       </View>
-    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingTop: Constants.statusBarHeight,
-    backgroundColor: '#ecf0f1',
-    padding: 8,
-  },
-  paragraph: {
-    margin: 24,
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
   resultContainer: {
     position: "relative",
     width: Dimensions.get('window').width ,
@@ -68,9 +59,14 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     position: "absolute",
-    width: Dimensions.get('window').width - 74, //74 is position + margin
+    width: Dimensions.get('window').width - 117, //74 is position + margin
     height: 64,
     overflow: "auto",
-    left: 69,
+    left: 69
+  },
+  moreInfo: {
+    position: 'absolute',
+    right: 25,
+    height: '100%'
   }
 });
