@@ -1,13 +1,7 @@
-import { StatusBar } from 'expo-status-bar';
-import { Button, SafeAreaView, StyleSheet, Text, TextInput, View, TouchableOpacity } from 'react-native';
 import {styles} from './static/styles/mainStyle'
-import {Component, useState} from 'react'
-import {create_form_data, ajax_handler} from './static/js/ajaxhandler'
-import 'react-native-gesture-handler';
 
 //NAVIGATION
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator} from '@react-navigation/drawer';
 //Custom Components
 import { CustomDrawer} from './components/navigation/drawerNavigation'
@@ -16,8 +10,8 @@ import { CustomDrawer} from './components/navigation/drawerNavigation'
 import { Register } from './components/screens/register';
 import { Login } from './components/screens/login';
 import { CreateEvent } from './components/screens/CreateEvent';
+import {ViewEvents} from './components/screens/viewEvents'
 import {SearchForSongs} from './components/screens/songSearch';
-//const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
 navigationScreenOptions={
@@ -40,9 +34,10 @@ export default function App(){
       
       <Drawer.Navigator  drawerContent={props => <CustomDrawer {...props} />}
       screenOptions={navigationScreenOptions} initialRouteName="Events"> 
+        <Drawer.Screen name = "Events" component={ViewEvents} />
         <Drawer.Screen name="Login" component={Login} />
         <Drawer.Screen name="Register" component={Register} />
-        <Drawer.Screen name ="Events" component={CreateEvent} />
+        <Drawer.Screen name ="Create Event" component={CreateEvent} />
         <Drawer.Screen name = "Song Search" component={SearchForSongs} />
       </Drawer.Navigator>
     </NavigationContainer>
