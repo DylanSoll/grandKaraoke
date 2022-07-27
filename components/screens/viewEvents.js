@@ -26,6 +26,69 @@ const exampleData = {
   'contact': 'email', 'title': 'Catchy Title'
 }
 var today = new Date();
+
+function createTimeSQLString(field, inpTime){
+  
+  const inpTimeModifier = Object.keys(inpTime).filter(key=>{
+    if (inpTime[key] != 'black') return true
+  });
+
+  let inpTimeStatement = ''
+
+  if ((inpTimeModifier.length !== 0) && (inpTime.time !== 0)){
+    let symbol = '<'
+    if (inpTimeModifier[0].includes('After')){
+      symbol = '>'
+    }else if (inpTimeModifier[0].includes('On')){
+      symbol = '='
+    }
+    inpTimeStatement = ` AND ${field} ${symbol} ${inpTime.time}`
+  }
+  return inpTimeStatement
+}
+
+function getDegreesPerKmLong(latitude){
+  const kmsPerDegreeLong = 111.320 * Math.cos(latitude/180)
+  return 1 / kmsPerDegreeLong;
+}
+
+function findMinMaxDegrees(lat, long, numKm){
+  const degreesPerKmLat = 0.00904371732;
+  const degreesPerKmLong = getDegreesPerKmLong(lat);
+  const latBounds = [lat - degreesPerKmLat * numKm, lat + degreesPerKmLat * numKm];
+  const longBounds = [long - degreesPerKmLong * numKm, long + degreesPerKmLong * numKm];
+  return {'lat':latBounds, 'long': longBounds}
+}
+
+function createLocationSQLString(location){
+  if (location.withinKm === -1) return ''
+  let bounds = findMinMaxDegrees(location.coordinates.latitude, location.coordinates.longitude, location.withinKm);
+  const lat = bounds.lat;
+  const long = bounds.long;
+  return ` AND latitude > ${lat[0]} and latitude < ${lat[1]} AND longitude > ${long[0]} and longitude < ${long[1]}`
+}
+function createUsernameSQLString(username){
+  if (username === '') return ''
+  
+  return ` AND username LIKE '%${username}%'`
+}
+
+function createAdvancedSQLQuery(){
+  let advancedSettings = {startTime: {time: 10, startBefore: 'advancedSettings'}, finishTime: {time: 0, finishBefore: '#525252'},
+    location: {coordinates: {latitude: -27, longitude: 152}, withinKm: 51}, username: 'a'}
+  let baseQuery = "SELECT events.*, username, email FROM events INNER JOIN users ON events.organiserID = users.userid"
+  const startTimeQuery = createTimeSQLString('startTime', advancedSettings.startTime);
+  const endTimeQuery = createTimeSQLString('startTime', advancedSettings.finishTime);
+  const locationQuery = createLocationSQLString(advancedSettings.location);
+  const usernameQuery = createUsernameSQLString(advancedSettings.username);
+  const allQueries = [startTimeQuery, endTimeQuery, locationQuery, usernameQuery];
+  const filteredQueries = allQueries.filter(query => query.length !== 0)
+  filteredQueries.forEach(query => {
+    baseQuery += query
+  });
+  return baseQuery.replace('AND ', 'WHERE ', 1)
+}
+//console.log(createAdvancedSQLQuery())
 export function ViewEvents({ navigation }) {
   const [topEvents, updateTopEvents] = useState([exampleData]);
   const [showMoreDetail, updateShowMoreDetail] = useState(false);
@@ -43,8 +106,8 @@ export function ViewEvents({ navigation }) {
     }
   );
   const [advancedModalNav, updateAdvancedModal] = useState({ location: 'true', locationColour: '#525252', time: 'none', timeColour: 'black', user: 'none', userColour: 'black' })
-  const [startBeforeSelectors, updateStartBeforeSelectors] = useState({startBefore: '#525252',startOn: 'black',startAfter: 'black'})
-  const [finishBeforeSelectors, updateFinishBeforeSelectors] = useState({finishBefore: '#525252',finishOn: 'black',finishAfter: 'black'})
+  const [startBeforeSelectors, updateStartBeforeSelectors] = useState({startBefore: 'black',startOn: 'black',startAfter: 'black'})
+  const [finishBeforeSelectors, updateFinishBeforeSelectors] = useState({finishBefore: 'black',finishOn: 'black',finishAfter: 'black'})
 
   const [inDepthEvent, updateInDepthEvent] = useState(null);
   return (
@@ -234,9 +297,12 @@ export function ViewEvents({ navigation }) {
 
             
             <View style={{ display: advancedModalNav.user }}>
-              <Text style={{ color: 'white' }}>
-                Users
+              <Text style={{ color: 'white', fontSize: 20, textAlign: 'center', margin: 5 }}>
+                Created By
               </Text>
+              <TextInput keyboardType='numeric' onChangeText={text=>{
+                  console.log(text)
+                }} style={[styles.input, { width: '95%', alignSelf: 'center', marginBottom: 10 }]}/>
             </View>
 
             <CustomButton onPress={() => { updateAdvancedSearchModal(false) }} label={'Dismiss'} fontSize={20} />
