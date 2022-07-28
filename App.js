@@ -12,6 +12,7 @@ import { Login } from './components/screens/login';
 import { CreateEvent } from './components/screens/CreateEvent';
 import {ViewEvents} from './components/screens/viewEvents'
 import {SearchForSongs} from './components/screens/songSearch';
+import AudioScreen from './components/screens/AudioRecordings';
 const Drawer = createDrawerNavigator();
 
 navigationScreenOptions={
@@ -33,12 +34,13 @@ export default function App(){
     <NavigationContainer>
       
       <Drawer.Navigator  drawerContent={props => <CustomDrawer {...props} />}
-      screenOptions={navigationScreenOptions} initialRouteName="Events"> 
+      screenOptions={navigationScreenOptions} initialRouteName="Audio"> 
         <Drawer.Screen name = "Events" component={ViewEvents} />
         <Drawer.Screen name="Login" component={Login} />
         <Drawer.Screen name="Register" component={Register} />
         <Drawer.Screen name ="Create Event" component={CreateEvent} />
         <Drawer.Screen name = "Song Search" component={SearchForSongs} />
+        <Drawer.Screen name = "Audio" component={AudioScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
     
