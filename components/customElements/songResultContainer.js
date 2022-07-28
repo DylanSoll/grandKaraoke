@@ -1,8 +1,14 @@
 import React from 'react';
 import { Text, View, StyleSheet, Image, Dimensions} from 'react-native';
 import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
-
+import { Audio } from 'expo-av';
 export function SongContainer(props) {
+  async function playSound(location) {
+    console.log('Loading Sound');
+    const { sound } = await Audio.Sound.createAsync({uri: location});
+    await sound.playAsync(); 
+    
+  }
   return (
       
       <View style={styles.resultContainer}>
@@ -14,15 +20,17 @@ export function SongContainer(props) {
 
         
         <View style = {styles.detailsContainer}>
-          <TouchableWithoutFeedback onPress={props.showMore}>
+          <TouchableWithoutFeedback onPress={props.showLyrics}>
             <Text style={styles.trackName} numberOfLines={1}>{props.trackName}</Text>
             <Text style={styles.artists} numberOfLines={1}>{props.artists}</Text>
             <Text style={styles.albumName} numberOfLines={1}>{props.albumName}</Text>
           </TouchableWithoutFeedback>
         </View>
         <View style={styles.moreInfo} >
-          <TouchableOpacity onPress={props.showLyrics}>
-            <Text style={{color: 'white', fontSize: 30, top: '25%'}}>+</Text>
+          <TouchableOpacity onPress={()=>{
+            playSound(props.previewURL)
+          }} disabled = {props.canPlay}>
+            <Text style={{color: 'white', fontSize: 30, top: '25%'}}>{'|>'} </Text>
           </TouchableOpacity>
         </View>
 

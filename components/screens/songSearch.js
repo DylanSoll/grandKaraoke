@@ -11,7 +11,18 @@ import { SongContainer } from '../customElements/songResultContainer';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { TouchableWithoutFeedback, TouchableHighlight, ScrollView } from 'react-native-gesture-handler';
 import { ExpandedSong } from '../customElements/expandedSong';
-let currentTrackID = null
+let currentTrackID = null;
+function getPreviewURL(data){
+    const trackItems = data.tracks;
+    let trackData = [];
+    for (let i = 0; i < trackItems.length; i++){
+        const track = trackItems[i];
+        const trackID = track.id;
+        const previewURL = track.preview_url;
+        trackData.push({songID: trackID, previewURL: previewURL});
+    }
+    return trackData
+}
 function simplifySearchResponse(data){
     const trackItems = data.tracks.items;
     let trackData = [];
@@ -20,7 +31,6 @@ function simplifySearchResponse(data){
         const trackName = track.name;
         const trackURL = track.uri;
         const trackID = track.id;
-        const previewURL = track.preview_url;
         const duration = track.duration_ms;
         let artistLists = track.artists.items.map(data => {
             return data.profile.name;
@@ -30,7 +40,7 @@ function simplifySearchResponse(data){
         const albumURL = track.albumOfTrack.uri;
         const albumImage = track.albumOfTrack.coverArt.sources[0].url
         trackData.push(
-            {'trackName': trackName, 'previewURL': previewURL, 'duration': duration, trackURL: trackURL,
+            {'trackName': trackName, 'duration': duration, trackURL: trackURL,
             'artists': artists, 'albumName':albumName, 'source': albumImage, 'trackID': trackID, albumURL: albumURL}
         );
     }
@@ -46,8 +56,23 @@ export function SearchForSongs({navigation}){
     const [songDetailsVisible, updateSongDetailsVisible] = useState(false);
     const [currentTrackIndex, updateCurrentTrackIndex] = useState(undefined);
     const [showActivityIndicator, updateActivityIndicator] = useState(false);
+    const [cantPlay, updateCantPlay] = useState(true)
+    const getPreviews = (data, results) =>{
+        const urls = getPreviewURL(data);
+        urls.forEach((item, index) => {
+            results[index].previewURL = item.previewURL;
+        });
+        updateResults(results)
+        updateCantPlay(false)
+
+    }
     const handleSearchResponse = data => {
-        updateResults(simplifySearchResponse(data));
+        updateCantPlay(true)
+        let initialResponseData = simplifySearchResponse(data);
+        updateResults(initialResponseData);
+        const idsArray = initialResponseData.map(obj => {return obj.trackID});
+        communicateWithSpotify('tracks', {ids: idsArray.join(',')}, (data) => {getPreviews(data, initialResponseData)})
+
     };
     const handleLyricsReturn = (lyricDataInp) => {
         const lyrics = lyricDataInp.lyrics;
@@ -176,11 +201,13 @@ export function SearchForSongs({navigation}){
                 <TouchableWithoutFeedback >
                     <View style={{width: Dimensions.get('window').width}} >
                         <SongContainer source = {item.source} previewURL = {item.previewURL} 
+                        canPlay = {cantPlay}
                         showLyrics = {()=>{
                             updateActivityIndicator(true);
                             handleLyricsRequest({'id':item.trackID});
                             updateVisibility(!modalVisible);  
                             }}
+                            
                         showMore = {()=>{console.log('testing')}}
                         trackName = {item.trackName} artists = {item.artists} albumName = {item.albumName} />
                     </View>
