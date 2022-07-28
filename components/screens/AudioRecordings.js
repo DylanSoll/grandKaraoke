@@ -1,10 +1,44 @@
 import React, {useState} from "react";
 import { Audio } from "expo-av";
-import { SafeAreaView, Text } from "react-native";
+import { Dimensions, SafeAreaView, Text, View } from "react-native";
 import { styles } from "../../static/styles/mainStyle";
-import { FlatList } from "react-native-gesture-handler";
+import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
+function NewRecording(props){
+  return (
+    <View style = {{borderWidth: 2, borderRadius: 20, borderColor: 'gray', 
+    width: Dimensions.get('screen').width * 0.8, padding: 5}}>
+      <Text style = {{color: 'white', fontSize: 20, textAlign: 'center'}}>
+        New Recording #{ props.idNum }
+      </Text>
+      <TouchableOpacity onPress={()=>{console.log('PLAY')}}>
+        <Text style = {{color: 'white', fontSize: 18, textAlign: 'center'}}>
+          Play for {props.duration}
+        </Text>
+      </TouchableOpacity>
+      <View style = {{flexDirection: 'row', justifyContent: 'center'}}>
+        <TouchableOpacity onPress={()=>{console.log('SHARE')}}>
+          <Text style = {{color: 'white', fontSize: 18, textAlign: 'center'}}>
+            Share
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={()=>{console.log('SHARE')}}>
+          <Text style = {{color: 'white', fontSize: 18, textAlign: 'center'}}>
+            Upload
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity onPress={()=>{console.log('DELETE')}}>
+        <Text style = {{color: 'white', fontSize: 18, textAlign: 'center'}}>
+          Delete
+        </Text>
+      </TouchableOpacity>
+      
+      
+    </View>
+  )
+}
 export default function AudioScreen({navigation}){
-    const [recordings, updateRecordings] = useState([])
+    const [recordings, updateRecordings] = useState([{uri: 'gsaga', duration: '1111', source: 'source'}])
     async function playSound(location) {
         console.log('Loading Sound');
         const { sound } = await Audio.Sound.createAsync({localUri: location});
@@ -40,21 +74,27 @@ export default function AudioScreen({navigation}){
     console.log('Stopping recording..');
     setRecording(undefined);
     await recording.stopAndUnloadAsync();
-    const uri = recording.getURI(); 
     let tempRecordings = recordings;
-    tempRecordings.push({uri:uri});
+    const uri = recording.getURI(); 
+    const {sound, status} = await recording.createNewLoadedSoundAsync();
+    tempRecordings.push({sound: sound, duration: status.durationMillis, uri: uri})
     updateRecordings(tempRecordings);
+    //sound.playAsync()
     console.log('Recording stopped and stored at', uri);
   }
   const [startStopRecording, updateStartStopRecording] = useState('Start')
     return (
         <SafeAreaView  style={[styles.safeAreaView, { alignSelf: 'center' }]}>
-            <Text style = {{color: 'white', fontSize: 20}} onPress = {recording ? stopRecording : startRecording}>{startStopRecording} Record</Text>
-            <FlatList data = {recordings} extraData = {recordings} renderItem = {({item})=>{return(
-                <Text style = {{color: 'white', fontSize: 20}} onPress = {()=>{
-                    playSound(item.uri)
-                }}>Play</Text>)
+            <Text style = {{color: 'white', fontSize: 20}} onPress = {recording ? stopRecording : startRecording}>{startStopRecording} Recording</Text>
+            <FlatList data = {recordings} extraData = {recordings} renderItem = {({item, index})=>{return(
+              <NewRecording idNum = {index + 1} duration = {item.duration} source = {item.source}/>)
             }}/>
         </SafeAreaView>
     )
 }
+/*
+
+                <Text style = {{color: 'white', fontSize: 20}} onPress = {()=>{
+                    item.sound.replayAsync()
+                }}>Play {index} for {item.duration}</Text>
+*/
