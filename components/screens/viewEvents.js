@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, Text, Keyboard, SafeAreaView, Dimensions, Modal, Linking, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, Text, Keyboard, SafeAreaView, Dimensions, Modal, Linking, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { FlatList, ScrollView, TouchableHighlight, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { styles } from '../../static/styles/mainStyle'
 import CustomButton from '../customElements/customButton';
@@ -84,7 +84,7 @@ function createAdvancedSQLQuery(advancedSettings) {
   filteredQueries.forEach(query => {
     baseQuery += query
   });
-  baseQuery += 'LIMIT 15'
+  baseQuery += 'ORDER BY startTime ASC LIMIT 15'
   return baseQuery.replace('AND ', 'WHERE ', 1)
 }
 function createGenericQuery(searchTerm) {
@@ -139,10 +139,11 @@ updateAdvancedSearchStatus({status: false, startTime: {time: 0, before: 'black',
 finishTime: {time: 0, before: 'black', on: 'black', after: 'black'},
 location: {coordinates: {latitude: undefined, longitude: undefined}, withinKm: -1}, username: ''})
 export function ViewEvents({ navigation }) {
-  const [topEvents, updateTopEvents] = useState([exampleData]);
+  const [topEvents, updateTopEvents] = useState([]);
   const [showMoreDetail, updateShowMoreDetail] = useState(false);
-  const [advancedSearchModal, updateAdvancedSearchModal] = useState(true);
+  const [advancedSearchModal, updateAdvancedSearchModal] = useState(false);
   const [mapModal, updateMapModal] = useState(false);
+  const [canSearch, updateCanSearch] = useState(false)
   const [mapModalData, updateMapModalData] = useState(
     {
       region: {
@@ -164,6 +165,33 @@ export function ViewEvents({ navigation }) {
   finishTime: {time: 0, before: 'black', on: 'black', after: 'black'},
   location: {coordinates: {latitude: undefined, longitude: undefined}, withinKm: -1}, username: ''});
   //console.log(createSQLQuery(advancedSearchSettings))
+  const eventSearchResponse = (response) => {
+    console.log(response)
+    if (response.length === 0) {
+      alert('No Results');
+    }
+    const mappedResponse = response.map(value => {
+      const newObject = {
+        startTime: value.startTime, 
+        endTime: value.endTime, 
+        creatorUsername: value.username, location: {
+          address: value.address,
+          position: {
+            lat: value.latitude,
+            lng: value.longitude
+          }
+        }, 
+        contact: value.email, title: value.title}
+      return newObject
+    });
+    updateTopEvents(mappedResponse);
+  
+}
+  useEffect(()=>{
+    const finalQuery = 'SELECT events.*, username, email FROM events INNER JOIN users ON events.organiserID = users.userid ORDER BY startTime ASC LIMIT 15'
+    
+  ajax_handler('http://dylansoll.pythonanywhere.com/search-events', eventSearchResponse, create_form_data({'query': finalQuery}));
+  },[])
   return (
     <SafeAreaView style={[styles.safeAreaView, { alignSelf: 'center' }]}>
       <Modal animationType="slide" visible={advancedSearchModal} transparent={false}
@@ -239,7 +267,7 @@ export function ViewEvents({ navigation }) {
                   }
                   advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
                   
-                  updateAdvancedSearchSettings(advancedSearchDetails)
+                  updateAdvancedSearchSettings(advancedSearchDetails);
                 }} style={[styles.input, { width: '95%', alignSelf: 'center', marginBottom: 10 }]} />
               </View>
               <Text style={{ color: 'white', fontSize: 20, textAlign: 'center', padding: 5 }}>
@@ -268,8 +296,19 @@ export function ViewEvents({ navigation }) {
                     fetchDetails={true}
                     renderDescription={row => row.description} // custom description render
                     onPress={(...data) => {
-                      const placeName = data[0]?.description;
                       const position = data[1].geometry.location;
+                      let advancedSearchDetails = advancedSearchSettings;
+                      const number = true
+                      if (number === ''){
+                        advancedSearchDetails.location.coordinates.latitude = undefined;
+                        advancedSearchDetails.location.coordinates.longitude = undefined;
+                      }else{
+                        advancedSearchDetails.location.coordinates.latitude = position.lat;
+                        advancedSearchDetails.location.coordinates.longitude = position.lng;
+                      }
+                      advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
+                      
+                      updateAdvancedSearchSettings(advancedSearchDetails);
                     }}
                     getDefaultValue={() => { return '' }}
                     query={{ key: 'AIzaSyDaBRloUNbM3Q3smNh-2sXTKXtLJhdVVJE', language: 'en', }}
@@ -298,7 +337,16 @@ export function ViewEvents({ navigation }) {
                     borderColor: 'gray', borderWidth: 2, borderRadius: '50%', padding: 5,
                     backgroundColor: startBeforeSelectors.startBefore
                   }}
-                    onPress={() => { updateStartBeforeSelectors({ startBefore: '#525252', startOn: 'black', startAfter: 'black' }) }}>
+                    onPress={() => { 
+                      let advancedSearchDetails = advancedSearchSettings;
+                      advancedSearchDetails.startTime.before = '#525252';
+                      advancedSearchDetails.startTime.on = 'black';
+                      advancedSearchDetails.startTime.after = 'black';
+                      advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
+                      updateAdvancedSearchSettings(advancedSearchDetails);
+
+                      updateStartBeforeSelectors({ startBefore: '#525252', startOn: 'black', startAfter: 'black' }) 
+                      }}>
                     <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>
                       Before
                     </Text>
@@ -307,7 +355,15 @@ export function ViewEvents({ navigation }) {
                     borderColor: 'gray', borderWidth: 2, borderRadius: '50%', padding: 5,
                     backgroundColor: startBeforeSelectors.startOn
                   }}
-                    onPress={() => { updateStartBeforeSelectors({ startBefore: 'black', startOn: '#525252', startAfter: 'black' }) }}>
+                    onPress={() => { 
+                      let advancedSearchDetails = advancedSearchSettings;
+                      advancedSearchDetails.startTime.before = 'black';
+                      advancedSearchDetails.startTime.on = '#525252';
+                      advancedSearchDetails.startTime.after = 'black';
+                      advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
+                      updateAdvancedSearchSettings(advancedSearchDetails);
+                      updateStartBeforeSelectors({ startBefore: 'black', startOn: '#525252', startAfter: 'black' }) 
+                      }}>
                     <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>
                       On
                     </Text>
@@ -316,7 +372,14 @@ export function ViewEvents({ navigation }) {
                     borderColor: 'gray', borderWidth: 2, borderRadius: '50%', padding: 5,
                     backgroundColor: startBeforeSelectors.startAfter
                   }}
-                    onPress={() => { updateStartBeforeSelectors({ startBefore: 'black', startOn: 'black', startAfter: '#525252' }) }}>
+                    onPress={() => { let advancedSearchDetails = advancedSearchSettings;
+                      advancedSearchDetails.startTime.before = 'black';
+                      advancedSearchDetails.startTime.on = 'black';
+                      advancedSearchDetails.startTime.after = '#525252';
+                      advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
+                      updateAdvancedSearchSettings(advancedSearchDetails);
+                      updateStartBeforeSelectors({ startBefore: 'black', startOn: 'black', startAfter: '#525252' }) 
+                      }}>
                     <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>
                       After
                     </Text>
@@ -328,7 +391,11 @@ export function ViewEvents({ navigation }) {
                   mode="datetime" placeholder="Select Time"
                   value={today} minimumDate={today}
                   onChange={(event, date) => {
-                    console.log(convertISOToEpoch(date))
+                    const epochStart = convertISOToEpoch(date);
+                    let advancedSearchDetails = advancedSearchSettings;
+                    advancedSearchDetails.startTime.time = epochStart;
+                    advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
+                    updateAdvancedSearchSettings(advancedSearchDetails);
                   }} />
 
 
@@ -341,7 +408,15 @@ export function ViewEvents({ navigation }) {
                     borderColor: 'gray', borderWidth: 2, borderRadius: '50%', padding: 5,
                     backgroundColor: finishBeforeSelectors.finishBefore
                   }}
-                    onPress={() => { updateFinishBeforeSelectors({ finishBefore: '#525252', finishOn: 'black', finishAfter: 'black' }) }}>
+                    onPress={() => { 
+                      let advancedSearchDetails = advancedSearchSettings;
+                      advancedSearchDetails.finishTime.before = '#525252';
+                      advancedSearchDetails.finishTime.on = 'black';
+                      advancedSearchDetails.finishTime.after = 'black';
+                      advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
+                      updateAdvancedSearchSettings(advancedSearchDetails);
+                      updateFinishBeforeSelectors({ finishBefore: '#525252', finishOn: 'black', finishAfter: 'black' }); 
+                      }}>
                     <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>
                       Before
                     </Text>
@@ -350,7 +425,15 @@ export function ViewEvents({ navigation }) {
                     borderColor: 'gray', borderWidth: 2, borderRadius: '50%', padding: 5,
                     backgroundColor: finishBeforeSelectors.finishOn
                   }}
-                    onPress={() => { updateFinishBeforeSelectors({ finishBefore: 'black', finishOn: '#525252', finishAfter: 'black' }) }}>
+                    onPress={() => { 
+                      let advancedSearchDetails = advancedSearchSettings;
+                      advancedSearchDetails.finishTime.before = 'black';
+                      advancedSearchDetails.finishTime.on = '#525252';
+                      advancedSearchDetails.finishTime.after = 'black';
+                      advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
+                      updateAdvancedSearchSettings(advancedSearchDetails);
+                      updateFinishBeforeSelectors({ finishBefore: 'black', finishOn: '#525252', finishAfter: 'black' });
+                       }}>
                     <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>
                       On
                     </Text>
@@ -359,7 +442,15 @@ export function ViewEvents({ navigation }) {
                     borderColor: 'gray', borderWidth: 2, borderRadius: '50%', padding: 5,
                     backgroundColor: finishBeforeSelectors.finishAfter
                   }}
-                    onPress={() => { updateFinishBeforeSelectors({ finishBefore: 'black', finishOn: 'black', finishAfter: '#525252' }) }}>
+                    onPress={() => { 
+                      let advancedSearchDetails = advancedSearchSettings;
+                      advancedSearchDetails.finishTime.before = 'black';
+                      advancedSearchDetails.finishTime.on = 'black';
+                      advancedSearchDetails.finishTime.after = '#525252';
+                      advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
+                      updateAdvancedSearchSettings(advancedSearchDetails);
+                      updateFinishBeforeSelectors({ finishBefore: 'black', finishOn: 'black', finishAfter: '#525252' }); 
+                      }}>
                     <Text style={{ color: 'white', fontSize: 15, textAlign: 'center' }}>
                       After
                     </Text>
@@ -371,7 +462,11 @@ export function ViewEvents({ navigation }) {
                   mode="datetime" placeholder="Select Time"
                   value={today} minimumDate={today}
                   onChange={(event, date) => {
-                    console.log(convertISOToEpoch(date))
+                    const epochFinish = convertISOToEpoch(date);
+                    let advancedSearchDetails = advancedSearchSettings;
+                    advancedSearchDetails.finishTime.time = epochFinish;
+                    advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
+                    updateAdvancedSearchSettings(advancedSearchDetails);
                   }} />
               </ScrollView>
             </View>
@@ -383,7 +478,10 @@ export function ViewEvents({ navigation }) {
                 Created By
               </Text>
               <TextInput keyboardType='numeric' onChangeText={text => {
-                console.log(text)
+                let advancedSearchDetails = advancedSearchSettings;
+                advancedSearchDetails.username = text;
+                advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
+                updateAdvancedSearchSettings(advancedSearchDetails);
               }} style={[styles.input, { width: '95%', alignSelf: 'center', marginBottom: 10 }]} />
             </View>
             <View style = {{flexDirection: 'row', justifyContent: 'center'}}>
@@ -394,7 +492,7 @@ export function ViewEvents({ navigation }) {
                 
                 }}>
                 <Text style = {{fontSize: 20, color: 'white', textAlign: 'center'}}>
-                  Clear
+                  Reset All
                 </Text>
               </TouchableOpacity>
               <CustomButton onPress={() => { updateAdvancedSearchModal(false) }} label={'Close'} fontSize={20} />
@@ -505,19 +603,28 @@ export function ViewEvents({ navigation }) {
       <View style={{ flexDirection: 'row', marginBottom: 5 }}>
         <TextInput style={{ width: Dimensions.get('screen').width * .75, backgroundColor: 'white', borderRadius: 12 }} placeholder="Search..." onChangeText={text=>{
           updateQuery(text);
+          if (text ===''){
+            updateCanSearch(true);
+          }else{
+            updateCanSearch(false);
+          }
           let advancedSearchDetails = advancedSearchSettings;
           advancedSearchDetails.status = false;
           updateAdvancedSearchSettings(advancedSearchDetails);
         }}/>
         <TouchableOpacity style={{ backgroundColor: 'blue', padding: 8, borderRadius: 10 }} onPress = {()=>{
-          let finalQuery = ''
+          let finalQuery = 'SELECT events.*, username, email FROM events INNER JOIN users ON events.organiserID = users.userid ORDER BY startTime ASC LIMIT 15'
           if (advancedSearchSettings.status === false){
             finalQuery = createSQLQuery(query);
           }else{
             finalQuery = createSQLQuery(advancedSearchSettings);
           }
           console.log(finalQuery);
-        }}>
+          
+          ajax_handler('http://dylansoll.pythonanywhere.com/create-event', eventSearchResponse, create_form_data({'query': finalQuery}));
+      }
+        
+        } disabled = {canSearch}>
           <Text style={{ color: 'white', fontSize: 20 }}>
             Search
           </Text>
