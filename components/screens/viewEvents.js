@@ -164,9 +164,7 @@ export function ViewEvents({ navigation }) {
   const [advancedSearchSettings, updateAdvancedSearchSettings] = useState({status: false, startTime: {time: 0, before: 'black', on: 'black', after: 'black'}, 
   finishTime: {time: 0, before: 'black', on: 'black', after: 'black'},
   location: {coordinates: {latitude: undefined, longitude: undefined}, withinKm: -1}, username: ''});
-  //console.log(createSQLQuery(advancedSearchSettings))
   const eventSearchResponse = (response) => {
-    console.log(response)
     if (response.length === 0) {
       alert('No Results');
     }
@@ -619,7 +617,6 @@ export function ViewEvents({ navigation }) {
           }else{
             finalQuery = createSQLQuery(advancedSearchSettings);
           }
-          console.log(finalQuery);
           
           ajax_handler('http://dylansoll.pythonanywhere.com/create-event', eventSearchResponse, create_form_data({'query': finalQuery}));
       }

@@ -56,7 +56,7 @@ export function SearchForSongs({navigation}){
     const [songDetailsVisible, updateSongDetailsVisible] = useState(false);
     const [currentTrackIndex, updateCurrentTrackIndex] = useState(undefined);
     const [showActivityIndicator, updateActivityIndicator] = useState(false);
-    const [cantPlay, updateCantPlay] = useState(true)
+    const [cantPlay, updateCantPlay] = useState(true);
     const getPreviews = (data, results) =>{
         const urls = getPreviewURL(data);
         urls.forEach((item, index) => {
@@ -107,7 +107,7 @@ export function SearchForSongs({navigation}){
     }
     
   return(
-      <SafeAreaView style={styles.safeAreaView} onPress={()=>{console.log('intercept')}}>
+      <SafeAreaView style={styles.safeAreaView}>
         <Spinner
             visible={showActivityIndicator}
             textContent={'Loading Lyrics'}
