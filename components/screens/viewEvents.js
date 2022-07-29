@@ -22,7 +22,7 @@ function convertISOToEpoch(ISOString) {
 }
 const exampleData = {
   'startTime': 1655726334, 'endTime': 1655727514,
-  'createrUsername': 'Dylan Soll', 'location': { 'address': '72 Pickering Street, Enogerra', 'position': { 'lat': -27, 'lng': 152 } },
+  'creatorUsername': 'Dylan Soll', 'location': { 'address': '72 Pickering Street, Enogerra', 'position': { 'lat': -27, 'lng': 152 } },
   'contact': 'email', 'title': 'Catchy Title'
 }
 var today = new Date();
@@ -513,7 +513,7 @@ export function ViewEvents({ navigation }) {
               {inDepthEvent?.title}
             </Text>
             <Text style={{ color: 'white', textAlign: 'center', fontSize: 25, paddingBottom: 5 }}>
-              Created by {inDepthEvent?.createrUsername}
+              Created by '{inDepthEvent?.creatorUsername}''
             </Text>
             <Text style={{ color: 'white', textAlign: 'center', fontSize: 19, paddingBottom: 5 }}>
               Starting on {shortenTimeToDate(inDepthEvent?.startTime)} at {shortenTimeToTime(inDepthEvent?.startTime)}
@@ -618,7 +618,7 @@ export function ViewEvents({ navigation }) {
             finalQuery = createSQLQuery(advancedSearchSettings);
           }
           
-          ajax_handler('http://dylansoll.pythonanywhere.com/create-event', eventSearchResponse, create_form_data({'query': finalQuery}));
+          ajax_handler('http://dylansoll.pythonanywhere.com/search-events', eventSearchResponse, create_form_data({'query': finalQuery}));
       }
         
         } disabled = {canSearch}>
@@ -644,10 +644,11 @@ export function ViewEvents({ navigation }) {
                 borderRadius: 15,
                 borderColor: 'grey',
                 borderWidth: 2,
-                padding: 8
+                padding: 8,
+                margin: 5
               }}>
                 <Text style={{ color: 'white', fontSize: 25, textAlign: 'center', paddingBottom: 5 }}>{item.title}</Text>
-                <Text style={{ color: 'white', fontSize: 22, textAlign: 'center', paddingBottom: 5 }}>{item.createrUsername}</Text>
+                <Text style={{ color: 'white', fontSize: 22, textAlign: 'center', paddingBottom: 5 }}>By: {item.creatorUsername}</Text>
                 <Text style={{ color: 'white', fontSize: 18, paddingBottom: 5 }}>{'Date >>> '} {shortenTimeToDate(item.startTime)} -- {shortenTimeToDate(item.endTime)}</Text>
                 <Text style={{ color: 'white', fontSize: 18, paddingBottom: 5 }}>{'Time >>> '} {shortenTimeToTime(item.startTime)} -- {shortenTimeToTime(item.endTime)}</Text>
                 <Text style={{ color: 'white', fontSize: 18, paddingBottom: 5 }}>{item?.location?.address}</Text>

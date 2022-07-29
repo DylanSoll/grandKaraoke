@@ -4,9 +4,29 @@ import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture
 import { Audio } from 'expo-av';
 export function SongContainer(props) {
   async function playSound(location) {
-    console.log('Loading Sound');
+    let oldSoundData = {}
     const { sound } = await Audio.Sound.createAsync({uri: location});
-    await sound.playAsync(); 
+    if (props.oldSound === undefined){
+      
+      props.updateSong(sound)
+      await sound.playAsync(); 
+    }else{
+      oldSoundData = await props.oldSound?.getStatusAsync();
+      const newSoundData = await sound.getStatusAsync();
+      props.oldSound?.pauseAsync();
+      if (newSoundData.uri !== oldSoundData?.uri){
+        props.updateSong(sound)
+        await sound.playAsync(); 
+      }else if (oldSoundData.isPlaying === false){
+        props.oldSound.playAsync();
+    }
+    }
+
+    
+    
+    
+    
+    
     
   }
   return (

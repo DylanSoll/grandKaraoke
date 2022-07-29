@@ -179,8 +179,8 @@ export function CreateEvent({ navigation }) {
             navigation.navigate('Login')
             return
           }
-          updateCanCreateModal(false)
         }
+        navigation.navigate('Events')
         ajax_handler('http://dylansoll.pythonanywhere.com/create-event', eventCreationResponse, eventForm);
       }}
         style={[styles.button, { backgroundColor: 'green', paddingLeft: 25, paddingRight: 25 }]}>

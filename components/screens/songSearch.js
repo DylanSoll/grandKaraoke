@@ -54,7 +54,7 @@ export function SearchForSongs({navigation}){
     const [prevOpened, updatePrevOpened] = useState(null);
     const [modalVisible, updateVisibility] = useState(false);
     const [songDetailsVisible, updateSongDetailsVisible] = useState(false);
-    const [currentTrackIndex, updateCurrentTrackIndex] = useState(undefined);
+    const [currentSound, updateCurrentSound] = useState(undefined);
     const [showActivityIndicator, updateActivityIndicator] = useState(false);
     const [cantPlay, updateCantPlay] = useState(true);
     const getPreviews = (data, results) =>{
@@ -207,7 +207,10 @@ export function SearchForSongs({navigation}){
                             handleLyricsRequest({'id':item.trackID});
                             updateVisibility(!modalVisible);  
                             }}
-                            
+                        updateSong = {(sound)=>{
+                            updateCurrentSound(sound)
+                        }}
+                        oldSound = {currentSound}
                         showMore = {()=>{console.log('testing')}}
                         trackName = {item.trackName} artists = {item.artists} albumName = {item.albumName} />
                     </View>

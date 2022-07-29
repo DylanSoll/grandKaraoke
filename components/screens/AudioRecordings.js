@@ -98,8 +98,9 @@ export default function AudioScreen({navigation}){
   const [recordingColour, updateRecordingColour] = useState('#00870e')
     return (
         <SafeAreaView  style={[styles.safeAreaView, { alignSelf: 'center' }]}>
-          <TouchableOpacity style = {{backgroundColor: recordingColour, paddingVertical: 2, paddingHorizontal: 7,borderRadius: 10, margin: 5, alignSelf: 'center'}}>
-            <Text style = {{color: 'white', fontSize: 20}} onPress = {recording ? stopRecording : startRecording}>{startStopRecording} Recording</Text>
+          <TouchableOpacity style = {{backgroundColor: recordingColour, paddingVertical: 2, paddingHorizontal: 7,borderRadius: 10, margin: 5, alignSelf: 'center'}}
+          onPress = {recording ? stopRecording : startRecording}>
+            <Text style = {{color: 'white', fontSize: 20}} >{startStopRecording} Recording</Text>
 
           </TouchableOpacity>
             <FlatList data = {recordings} extraData = {recordings} renderItem = {({item, index})=>{return(
