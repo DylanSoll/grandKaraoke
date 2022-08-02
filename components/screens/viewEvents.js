@@ -20,6 +20,12 @@ function convertISOToEpoch(ISOString) {
   const epochMs = dateObj.getTime();
   return Math.floor(epochMs / 1000)
 }
+
+function convertEpochToIso(epoch){
+  const epochMs = parseInt(epoch) * 1000
+  const dateObj = new Date(epochMs)
+  return dateObj
+}
 const exampleData = {
   'startTime': 1655726334, 'endTime': 1655727514,
   'creatorUsername': 'Dylan Soll', 'location': { 'address': '72 Pickering Street, Enogerra', 'position': { 'lat': -27, 'lng': 152 } },
@@ -98,9 +104,9 @@ function createSQLQuery(queryInp) {
 }
 function updateAdvancedSearchStatus(advancedSearchDetails){
   const blankSettings = {status: false, startTime: {
-    time: 0, before: 'black', on: 'black', after: 'black'
+    time: convertISOToEpoch(today), before: 'black', on: 'black', after: 'black'
   }, finishTime: {
-    time: 0, before: 'black', on: 'black', after: 'black'
+    time: convertISOToEpoch(today), before: 'black', on: 'black', after: 'black'
   }, location: {
     coordinates: {
       latitude: undefined, longitude: undefined
@@ -135,8 +141,8 @@ function updateAdvancedSearchStatus(advancedSearchDetails){
   return advancedSearchDetails
 
 }
-updateAdvancedSearchStatus({status: false, startTime: {time: 0, before: 'black', on: 'black', after: 'black'}, 
-finishTime: {time: 0, before: 'black', on: 'black', after: 'black'},
+updateAdvancedSearchStatus({status: false, startTime: {time: convertISOToEpoch(today), before: 'black', on: 'black', after: 'black'}, 
+finishTime: {time: convertISOToEpoch(today), before: 'black', on: 'black', after: 'black'},
 location: {coordinates: {latitude: undefined, longitude: undefined}, withinKm: -1}, username: ''})
 export function ViewEvents({ navigation }) {
   const [topEvents, updateTopEvents] = useState([]);
@@ -161,8 +167,8 @@ export function ViewEvents({ navigation }) {
 
   const [inDepthEvent, updateInDepthEvent] = useState(null);
   const [query, updateQuery] = useState('');
-  const [advancedSearchSettings, updateAdvancedSearchSettings] = useState({status: false, startTime: {time: 0, before: 'black', on: 'black', after: 'black'}, 
-  finishTime: {time: 0, before: 'black', on: 'black', after: 'black'},
+  const [advancedSearchSettings, updateAdvancedSearchSettings] = useState({status: false, startTime: {time: convertISOToEpoch(today), before: 'black', on: 'black', after: 'black'}, 
+  finishTime: {time: convertISOToEpoch(today), before: 'black', on: 'black', after: 'black'},
   location: {coordinates: {latitude: undefined, longitude: undefined}, withinKm: -1}, username: ''});
   const eventSearchResponse = (response) => {
     if (response.length === 0) {
@@ -255,7 +261,7 @@ export function ViewEvents({ navigation }) {
                 <Text style={{ color: 'white', fontSize: 20, textAlign: 'center', padding: 5 }}>
                   Within (km)
                 </Text>
-                <TextInput keyboardType='numeric' onChangeText={number => {
+                <TextInput keyboardType='numeric' value = {advancedSearchSettings.location.withinKm}onChangeText={number => {
                   let advancedSearchDetails = advancedSearchSettings;
                   
                   if (number === ''){
@@ -288,7 +294,6 @@ export function ViewEvents({ navigation }) {
                     placeholder="Location..."
                     minLength={2} // minimum length of text to search
                     autoFocus={false}
-
                     returnKeyType={'search'} // Can be left out for default return key https://facebook.github.io/react-native/docs/textinput.html#returnkeytype
                     listViewDisplayed="auto" // true/false/undefined
                     fetchDetails={true}
@@ -296,14 +301,8 @@ export function ViewEvents({ navigation }) {
                     onPress={(...data) => {
                       const position = data[1].geometry.location;
                       let advancedSearchDetails = advancedSearchSettings;
-                      const number = true
-                      if (number === ''){
-                        advancedSearchDetails.location.coordinates.latitude = undefined;
-                        advancedSearchDetails.location.coordinates.longitude = undefined;
-                      }else{
-                        advancedSearchDetails.location.coordinates.latitude = position.lat;
-                        advancedSearchDetails.location.coordinates.longitude = position.lng;
-                      }
+                      advancedSearchDetails.location.coordinates.latitude = position.lat;
+                      advancedSearchDetails.location.coordinates.longitude = position.lng;
                       advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
                       
                       updateAdvancedSearchSettings(advancedSearchDetails);
@@ -387,7 +386,7 @@ export function ViewEvents({ navigation }) {
                   display='spinner' textColor='white'
 
                   mode="datetime" placeholder="Select Time"
-                  value={today} minimumDate={today}
+                  value={convertEpochToIso(advancedSearchSettings.startTime.time)} minimumDate={today}
                   onChange={(event, date) => {
                     const epochStart = convertISOToEpoch(date);
                     let advancedSearchDetails = advancedSearchSettings;
@@ -458,7 +457,7 @@ export function ViewEvents({ navigation }) {
                   display='spinner' textColor='white'
 
                   mode="datetime" placeholder="Select Time"
-                  value={today} minimumDate={today}
+                  value={convertEpochToIso(advancedSearchSettings.finishTime.time)} minimumDate={convertEpochToIso(advancedSearchSettings.startTime.time)}
                   onChange={(event, date) => {
                     const epochFinish = convertISOToEpoch(date);
                     let advancedSearchDetails = advancedSearchSettings;
@@ -484,11 +483,13 @@ export function ViewEvents({ navigation }) {
             </View>
             <View style = {{flexDirection: 'row', justifyContent: 'center'}}>
               <TouchableOpacity style = {[styles.button, {backgroundColor: '#ff521f'}]} onPress={()=>{
-                updateAdvancedSearchSettings({status: false, startTime: {time: 0, before: 'black', on: 'black', after: 'black'}, 
-                finishTime: {time: 0, before: 'black', on: 'black', after: 'black'},
+                updateAdvancedSearchSettings({status: false, startTime: {time: convertISOToEpoch(today), before: 'black', on: 'black', after: 'black'}, 
+                finishTime: {time: convertISOToEpoch(today), before: 'black', on: 'black', after: 'black'},
                 location: {coordinates: {latitude: undefined, longitude: undefined}, withinKm: -1}, username: ''})
-                
-                }}>
+                updateFinishBeforeSelectors({finishBefore: 'black', finishOn: 'black', finishAfter: 'black'})
+                updateStartBeforeSelectors({startBefore: 'black', startOn: 'black', startAfter: 'black'})
+                }}
+                >
                 <Text style = {{fontSize: 20, color: 'white', textAlign: 'center'}}>
                   Reset All
                 </Text>

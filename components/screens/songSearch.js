@@ -1,10 +1,10 @@
 "use strict"
 import {React, useState} from 'react';
 
-import { View,TextInput, Text, Keyboard, SafeAreaView, FlatList, Dimensions, Modal, Image, Linking, StyleSheet } from 'react-native';
+import { View,TextInput, Text, Keyboard, SafeAreaView, FlatList, Dimensions, Modal, Image, Linking, StyleSheet, TouchableOpacity } from 'react-native';
 import { ajax_handler, create_form_data, communicateWithSpotify } from '../../static/js/ajaxhandler';
 import * as Speech from 'expo-speech'
-
+import { Audio } from 'expo-av';
 import {styles} from '../../static/styles/mainStyle'
 import CustomButton from '../customElements/customButton';
 import { SongContainer } from '../customElements/songResultContainer';
@@ -57,6 +57,7 @@ export function SearchForSongs({navigation}){
     const [currentSound, updateCurrentSound] = useState(undefined);
     const [showActivityIndicator, updateActivityIndicator] = useState(false);
     const [cantPlay, updateCantPlay] = useState(true);
+    const [cantShazam, updateCantShazam] = useState(false)
     const getPreviews = (data, results) =>{
         const urls = getPreviewURL(data);
         urls.forEach((item, index) => {
@@ -105,7 +106,30 @@ export function SearchForSongs({navigation}){
             communicateWithSpotify('track_lyrics', trackID, handleLyricsReturn);
         }
     }
+    async function startRecording() {
+        try {
+          await Audio.requestPermissionsAsync();
+          await Audio.setAudioModeAsync({
+            allowsRecordingIOS: true,
+            
+            playsInSilentModeIOS: true,
+          }); 
+          const { recording } = await Audio.Recording.createAsync(
+            Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY  
+          );
+          setTimeout(async ()=>{
+            await recording.stopAndUnloadAsync();
+            const uri = recording.getURI(); 
+            const {sound, status} = await recording.createNewLoadedSoundAsync();
+            await sound.playAsync();
+            console.log(uri)
+          }, 3000);
+        } catch (err) {
+          console.error('Failed to start recording', err);
+        }
+      }
     
+
   return(
       <SafeAreaView style={styles.safeAreaView}>
         <Spinner
@@ -193,6 +217,13 @@ export function SearchForSongs({navigation}){
             }} fontSize = {18}
             disabled = {canSearch}/>
         </View>
+        <TouchableOpacity onPress={()=>{alert('project currently under development')
+         
+        }} disabled = {false}>
+            <Text style = {{color: 'white', fontSize: 20, textAlign: 'center'}}>
+                SHAZAM
+            </Text>
+        </TouchableOpacity>
         <TouchableWithoutFeedback onPress={()=>{
             Keyboard.dismiss()
             }}>
@@ -220,6 +251,7 @@ export function SearchForSongs({navigation}){
             )
             } } />        
         </ TouchableWithoutFeedback>
+        
       </SafeAreaView>
       
   )
