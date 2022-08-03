@@ -135,7 +135,14 @@ export default function AudioScreen({navigation}){
   const [recordings, updateRecordings] = useState([])
   const [oldRecordings, updateOldRecordings] = useState([])
   useEffect(()=>{
-    ajax_handler('https://dylansoll.pythonanywhere.com/get-audio', updateOldRecordings);
+    const handleResponse = (response) => {
+      if (response === 'login'){
+        navigation.navigate('Account')
+        return
+      }
+      updateOldRecordings(response)
+    }
+    ajax_handler('https://dylansoll.pythonanywhere.com/get-audio', handleResponse);
   }, []);
   
   const [recording, setRecording] = React.useState();
@@ -218,8 +225,17 @@ export default function AudioScreen({navigation}){
                 })
                 updateRecordings(tempRecordings);
               }}
+              
               saveAudio = {()=>{
-                ajax_handler('https://dylansoll.pythonanywhere.com/get-audio', updateOldRecordings);
+                const handleResponse = (response) => {
+                  if (response === 'login'){
+                    navigation.navigate('Account');
+                    return
+                  }
+                  updateOldRecordings(response);
+                  
+                }
+                ajax_handler('https://dylansoll.pythonanywhere.com/get-audio', handleResponse);
               }}
               />)
             }}/>
