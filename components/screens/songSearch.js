@@ -57,7 +57,6 @@ export function SearchForSongs({navigation}){
     const [currentSound, updateCurrentSound] = useState(undefined);
     const [showActivityIndicator, updateActivityIndicator] = useState(false);
     const [cantPlay, updateCantPlay] = useState(true);
-    const [cantShazam, updateCantShazam] = useState(false)
     const getPreviews = (data, results) =>{
         const urls = getPreviewURL(data);
         urls.forEach((item, index) => {
@@ -106,28 +105,6 @@ export function SearchForSongs({navigation}){
             communicateWithSpotify('track_lyrics', trackID, handleLyricsReturn);
         }
     }
-    async function startRecording() {
-        try {
-          await Audio.requestPermissionsAsync();
-          await Audio.setAudioModeAsync({
-            allowsRecordingIOS: true,
-            
-            playsInSilentModeIOS: true,
-          }); 
-          const { recording } = await Audio.Recording.createAsync(
-            Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY  
-          );
-          setTimeout(async ()=>{
-            await recording.stopAndUnloadAsync();
-            const uri = recording.getURI(); 
-            const {sound, status} = await recording.createNewLoadedSoundAsync();
-            await sound.playAsync();
-            console.log(uri)
-          }, 3000);
-        } catch (err) {
-          console.error('Failed to start recording', err);
-        }
-      }
     
 
   return(
@@ -161,7 +138,6 @@ export function SearchForSongs({navigation}){
                             Speech.VoiceQuality.Enhanced
                             Speech.speak(item.words);
                             
-                            console.log('should be speaking')
                         }}>
                             
                             <Text
@@ -217,13 +193,6 @@ export function SearchForSongs({navigation}){
             }} fontSize = {18}
             disabled = {canSearch}/>
         </View>
-        <TouchableOpacity onPress={()=>{alert('project currently under development')
-         
-        }} disabled = {false}>
-            <Text style = {{color: 'white', fontSize: 20, textAlign: 'center'}}>
-                SHAZAM
-            </Text>
-        </TouchableOpacity>
         <TouchableWithoutFeedback onPress={()=>{
             Keyboard.dismiss()
             }}>
@@ -242,7 +211,6 @@ export function SearchForSongs({navigation}){
                             updateCurrentSound(sound)
                         }}
                         oldSound = {currentSound}
-                        showMore = {()=>{console.log('testing')}}
                         trackName = {item.trackName} artists = {item.artists} albumName = {item.albumName} />
                     </View>
                 </TouchableWithoutFeedback>

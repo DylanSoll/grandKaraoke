@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import { Audio } from "expo-av";
 import { Dimensions, SafeAreaView, Text, TextInput, View } from "react-native";
 import { styles } from "../../static/styles/mainStyle";
@@ -14,13 +14,17 @@ function formatTime(timeInMS){
   const minutes = Math.floor(currentTime / 60);
   const remainingSeconds = currentTime - minutes * 60;
   return `${minutes}m${Math.floor(remainingSeconds)}s`
-  
+}
+function getTimeSec(){
+	const dateObj = new Date();
+  const timeMS = dateObj.getTime();
+	return Math.floor(timeMS/1000);
 }
 function NewRecording(props){
   const [name, updateName] = useState(`New Recording #${props.idNum}`)
   return (
     <View style = {{borderWidth: 2, borderRadius: 20, borderColor: 'gray', 
-    width: Dimensions.get('window').width * 0.8, padding: 5, alignSelf: 'center', marginBottom: 10}}>
+    width: Dimensions.get('window').width * 0.8, padding: 5, alignSelf: 'center', marginVertical: 5}}>
       <TextInput style = {[styles.input, {width: '95%', alignSelf: 'center'}]} value = {name} onChangeText = {text => {
         updateName(text)
       }}/>
@@ -69,14 +73,11 @@ function NewRecording(props){
           });
         
           const audioBase64 = await blobToBase64(blob);
-          const form = create_form_data({'file': audioBase64, 'name': name, 'duration': props.duration})
-          ajax_handler('https://dylansoll.pythonanywhere.com/upload-audio', console.log, form)
-          //</View>
-          /*fetch(props.uri)
-          .then(response => {
-            console.log(JSON.stringify(response))
-            
-          })*/
+          const query = `INSERT INTO audio (creatorID, name, duration, file, creationTime) VALUES (?, "${name}", "${props.duration}", ${JSON.stringify(blob.data.name)}, "${getTimeSec()}")`
+          const form = create_form_data({'query': query})
+          ajax_handler('https://dylansoll.pythonanywhere.com/upload-audio', props.saveAudio, form)
+          props.deleteFunction()
+          
         }}>
           <Text style = {{color: 'white', fontSize: 18, textAlign: 'center'}}>
             Save
@@ -94,31 +95,67 @@ function NewRecording(props){
     </View>
   )
 }
+function OldRecording(props){
+  return (
+    <View style = {{borderWidth: 2, borderRadius: 20, borderColor: 'gray', 
+    width: Dimensions.get('window').width * 0.8, padding: 5, alignSelf: 'center', marginVertical: 5}}>
+      <Text style = {{color: 'white', fontSize: 20, textAlign: 'center'}}>
+        {props.name}
+      </Text>
+      <TouchableOpacity onPress={()=>{
+        props?.source?.replayAsync();
+        }}>
+        <Text style = {{color: '#00a6ff', fontSize: 18, textAlign: 'center', margin: 5}}>
+          Play for {formatTime(props.duration)}
+        </Text>
+      </TouchableOpacity>
+      <View style = {{flexDirection: 'row', justifyContent: 'center'}}>
+        <TouchableOpacity style = {{backgroundColor: '#0075eb', paddingVertical: 2, paddingHorizontal: 7, margin: 5, borderRadius: 10}} 
+        onPress={()=>{
+          Sharing?.shareAsync(props?.uri)
+        }}> 
+          <Text style = {{color: 'white', fontSize: 18, textAlign: 'center'}}>
+            Share
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style = {{backgroundColor: '#de101d', paddingVertical: 2, paddingHorizontal: 7,borderRadius: 10, margin: 5, alignSelf: 'center'}} 
+      onPress={props.deleteFunction}>
+        <Text style = {{color: 'white', fontSize: 18, textAlign: 'center'}}>
+          Delete
+        </Text>
+      </TouchableOpacity>
+      </View>
+      
+      
+      
+    </View>
+  )
+}
 export default function AudioScreen({navigation}){
-    const [recordings, updateRecordings] = useState([])
-    async function playSound(location) {
-        const { sound } = await Audio.Sound.createAsync({localUri: location});
-
-        await sound.playAsync(); }
-    
-        const [recording, setRecording] = React.useState();
-
+  const [recordings, updateRecordings] = useState([])
+  const [oldRecordings, updateOldRecordings] = useState([])
+  useEffect(()=>{
+    ajax_handler('https://dylansoll.pythonanywhere.com/get-audio', updateOldRecordings);
+  }, []);
+  
+  const [recording, setRecording] = React.useState();
+  
   async function startRecording() {
-    try {
-      updateRecordingColour('#c7002e');
-      updateStartStopRecording('Stop');
-      await Audio.requestPermissionsAsync();
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      }); 
-      const { recording } = await Audio.Recording.createAsync(
-         Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-      );
-      setRecording(recording);
-    } catch (err) {
-      console.error('Failed to start recording', err);
-    }
+  try {
+    updateRecordingColour('#c7002e');
+    updateStartStopRecording('Stop');
+    await Audio.requestPermissionsAsync();
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
+    }); 
+    const { recording } = await Audio.Recording.createAsync(
+        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+    );
+    setRecording(recording);
+  } catch (err) {
+    console.error('Failed to start recording', err);
+  }
   }
 
   async function stopRecording() {
@@ -135,7 +172,7 @@ export default function AudioScreen({navigation}){
   const [startStopRecording, updateStartStopRecording] = useState('Start')
   const [recordingColour, updateRecordingColour] = useState('#00870e')
   const [activePill, updateActivePill] = useState({old: 'black', new: '#525252'});
-  const [activeDisplay, updateActiveDisplay] = useState({old: 'none', new: true});
+  const [activeDisplay, updateActiveDisplay] = useState({old: 'none', new: 'true'});
     return (
         <SafeAreaView  style={[styles.safeAreaView, { alignSelf: 'center' }]}>
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
@@ -159,7 +196,7 @@ export default function AudioScreen({navigation}){
               }}
                 onPress={() => {
                   updateActivePill({new: 'black', old: '#525252'});
-                  updateActiveDisplay({old: true, new: 'none'})
+                  updateActiveDisplay({old: 'true', new: 'none'})
                 }}>
                 <Text style={{ color: 'white', fontSize: 20, padding: 5 }}>
                   View Old
@@ -175,20 +212,31 @@ export default function AudioScreen({navigation}){
             <FlatList data = {recordings} extraData = {recordings} renderItem = {({item, index})=>{return(
               <NewRecording idNum = {index + 1} duration = {item.duration} source = {item.sound} uri = {item.uri}
               deleteFunction = {()=>{
-                let tempRecordings = [...recordings];
-                tempRecordings.splice(index, 1);
+                let tempRecordings = recordings.filter((item, index2) => {
+                  if (index2 === index) return false
+                  return true
+                })
                 updateRecordings(tempRecordings);
-              }}/>)
+              }}
+              saveAudio = {()=>{
+                ajax_handler('https://dylansoll.pythonanywhere.com/get-audio', updateOldRecordings);
+              }}
+              />)
             }}/>
             </View>
             <View style = {{display: activeDisplay.old}}>
-              <FlatList data = {recordings} extraData = {recordings} renderItem = {({item, index})=>{return(
-                <NewRecording idNum = {index + 1} duration = {item.duration} source = {item.sound} uri = {item.uri}
+              <FlatList data = {oldRecordings} extraData = {oldRecordings} renderItem = {({item, index})=>{return(
+                <OldRecording idNum = {index + 1} duration = {item.duration} source = {item.sound} uri = {item.uri} name = {item.name}
                 deleteFunction = {()=>{
-                  let tempRecordings = [...recordings];
-                  tempRecordings.splice(index, 1);
-                  updateRecordings(tempRecordings);
-                }}/>)
+                  let tempRecordings = oldRecordings.filter((item, index2) => {
+                    if (index2 === index) return false
+                    return true
+                  })
+
+                  updateOldRecordings(tempRecordings);
+                  ajax_handler(`https://dylansoll.pythonanywhere.com/delete-audio`, (result)=>{}, create_form_data({'id':item.audioID}))
+                }}
+                />)
               }}/>
             </View>
           
@@ -196,6 +244,8 @@ export default function AudioScreen({navigation}){
     )
 }
 /*
+SELECT audio.* FROM audio WHERE audio.creatorID = 1
+
 
                 <Text style = {{color: 'white', fontSize: 20}} onPress = {()=>{
                     item.sound.replayAsync()

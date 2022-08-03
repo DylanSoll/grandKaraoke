@@ -45,19 +45,6 @@ export function checkPasswordForColourChange(password){
   return '#129c00'
 }
 
-function handleSuccessfullLogin(response){
-  const username = response?.username;
-  const permissions = response?.permissions;
-  const userid = response?.userid;
-  console.log(response);
-}
-function handleUnsuccessfullLogin(response){
-  const username = response?.username;
-  const name = response?.name;
-  const permissions = response?.permissions;
-  const userid = response?.userid;
-  console.log(response);
-}
 
 export function validateLoginDetails(email, password){
   if (validateEmail(email) === false) return false;
@@ -188,7 +175,7 @@ export function validateRegisterDetails(username, email, confirmEmail, password,
   return true
 }
 
-export function tryLogin(email, password){
+export function tryLogin(email, password, onSuccess){
   if (validateEmail(email) === false) return false;
 
   if (validatePassword(password) === false) return false;
@@ -197,11 +184,11 @@ export function tryLogin(email, password){
     'email': email,
     'password': password,
   }); // creates a form with the login data
-  ajax_handler('http://dylansoll.pythonanywhere.com/login', console.log, loginForm);
+  ajax_handler('http://dylansoll.pythonanywhere.com/login', onSuccess, loginForm);
   return true
 }
 
-export function tryRegister(username, email, confirmEmail, password, confirmPassword){
+export function tryRegister(username, email, confirmEmail, password, confirmPassword, onSuccess){
 
   if (validateUsername(username) === false) return [false, 'username'] 
 
@@ -217,6 +204,6 @@ export function tryRegister(username, email, confirmEmail, password, confirmPass
     'email': email,
     'password': password
   }) 
-  ajax_handler('http://dylansoll.pythonanywhere.com/register', console.log, registerForm);
+  ajax_handler('http://dylansoll.pythonanywhere.com/register', onSuccess, registerForm);
   return true
 }

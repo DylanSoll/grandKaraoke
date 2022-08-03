@@ -4,6 +4,7 @@ import { FlatList, ScrollView, TouchableHighlight, TouchableWithoutFeedback } fr
 import { styles } from '../../static/styles/mainStyle'
 import CustomButton from '../customElements/customButton';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import * as Speech from 'expo-speech'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { create_form_data, ajax_handler } from '../../static/js/ajaxhandler'
 import MapView, { Marker } from 'react-native-maps';
@@ -26,10 +27,11 @@ function convertEpochToIso(epoch){
   const dateObj = new Date(epochMs)
   return dateObj
 }
-const exampleData = {
-  'startTime': 1655726334, 'endTime': 1655727514,
-  'creatorUsername': 'Dylan Soll', 'location': { 'address': '72 Pickering Street, Enogerra', 'position': { 'lat': -27, 'lng': 152 } },
-  'contact': 'email', 'title': 'Catchy Title'
+
+function getCurrentTimeSec(){
+  const dateObj = new Date();
+  const timeMS = dateObj.getTime();
+  return Math.floor(timeMS/1000)
 }
 var today = new Date();
 
@@ -42,12 +44,15 @@ function createTimeSQLString(field, inpTime) {
   let inpTimeStatement = ''
 
   if ((inpTimeModifier.length !== 0) && (inpTime.time !== 0)) {
-    let symbol = '<'
-    if (inpTimeModifier[0].includes('After')) {
-      symbol = '>'
-    } else if (inpTimeModifier[0].includes('On')) {
-      symbol = '='
+    let symbol = ''
+    if (inpTimeModifier[0].includes('before')){
+      symbol = '<'
     }
+    else if (inpTimeModifier[0].includes('after')) {
+      symbol = '>'
+    } else if (inpTimeModifier[0].includes('on')) {
+      symbol = '='
+    }else return ''
     inpTimeStatement = ` AND ${field} ${symbol} ${inpTime.time}`
   }
   return inpTimeStatement
@@ -82,7 +87,7 @@ function createUsernameSQLString(username) {
 function createAdvancedSQLQuery(advancedSettings) {
   let baseQuery = "SELECT events.*, username, email FROM events INNER JOIN users ON events.organiserID = users.userid"
   const startTimeQuery = createTimeSQLString('startTime', advancedSettings.startTime);
-  const endTimeQuery = createTimeSQLString('startTime', advancedSettings.finishTime);
+  const endTimeQuery = createTimeSQLString('endTime', advancedSettings.finishTime);
   const locationQuery = createLocationSQLString(advancedSettings.location);
   const usernameQuery = createUsernameSQLString(advancedSettings.username);
   const allQueries = [startTimeQuery, endTimeQuery, locationQuery, usernameQuery];
@@ -90,11 +95,12 @@ function createAdvancedSQLQuery(advancedSettings) {
   filteredQueries.forEach(query => {
     baseQuery += query
   });
+  baseQuery += ` AND startTime > ${getCurrentTimeSec()} `
   baseQuery += 'ORDER BY startTime ASC LIMIT 15'
   return baseQuery.replace('AND ', 'WHERE ', 1)
 }
 function createGenericQuery(searchTerm) {
-  return `SELECT events.*, username, email FROM events INNER JOIN users ON events.organiserID = users.userid WHERE (username LIKE '%${searchTerm}%' OR title LIKE '%${searchTerm}%' OR address LIKE '%${searchTerm}%' OR latitude LIKE '%${searchTerm}%' OR longitude LIKE '%${searchTerm}%') LIMIT 15`
+  return `SELECT events.*, username, email FROM events INNER JOIN users ON events.organiserID = users.userid WHERE (username LIKE '%${searchTerm}%' OR title LIKE '%${searchTerm}%' OR address LIKE '%${searchTerm}%' OR latitude LIKE '%${searchTerm}%' OR longitude LIKE '%${searchTerm}%') AND startTime > ${getCurrentTimeSec()} LIMIT 15`
 }
 
 function createSQLQuery(queryInp) {
@@ -171,6 +177,9 @@ export function ViewEvents({ navigation }) {
   finishTime: {time: convertISOToEpoch(today), before: 'black', on: 'black', after: 'black'},
   location: {coordinates: {latitude: undefined, longitude: undefined}, withinKm: -1}, username: ''});
   const eventSearchResponse = (response) => {
+    if (response === 'login'){
+      navigation.navigate('Account')
+    }
     if (response.length === 0) {
       alert('No Results');
     }
@@ -192,7 +201,7 @@ export function ViewEvents({ navigation }) {
   
 }
   useEffect(()=>{
-    const finalQuery = 'SELECT events.*, username, email FROM events INNER JOIN users ON events.organiserID = users.userid ORDER BY startTime ASC LIMIT 15'
+    const finalQuery = `SELECT events.*, username, email FROM events INNER JOIN users ON events.organiserID = users.userid WHERE startTime > ${getCurrentTimeSec()} ORDER BY startTime ASC LIMIT 15`
     
   ajax_handler('http://dylansoll.pythonanywhere.com/search-events', eventSearchResponse, create_form_data({'query': finalQuery}));
   },[])
@@ -284,10 +293,8 @@ export function ViewEvents({ navigation }) {
                   <GooglePlacesAutocomplete
                     textInputProps={{
                       onFocus: () => {
-                        //updateSearchHeight('60%');
                       },
                       onBlur: () => {
-                        //updateSearchHeight('8%');
                         Keyboard.dismiss();
                       }
                     }}
@@ -304,7 +311,6 @@ export function ViewEvents({ navigation }) {
                       advancedSearchDetails.location.coordinates.latitude = position.lat;
                       advancedSearchDetails.location.coordinates.longitude = position.lng;
                       advancedSearchDetails = updateAdvancedSearchStatus(advancedSearchDetails);
-                      
                       updateAdvancedSearchSettings(advancedSearchDetails);
                     }}
                     getDefaultValue={() => { return '' }}
@@ -585,7 +591,7 @@ export function ViewEvents({ navigation }) {
                 title={mapModalData.marker.title} description={mapModalData.marker.description}
                 tappable={true}
                 onPress={e => {
-                  console.log(e.nativeEvent)
+                  Speech.speak(mapModalData.marker.description);
                 }}
               />
             </MapView>
