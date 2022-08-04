@@ -12,9 +12,9 @@ import {ViewEvents} from './components/screens/viewEvents'
 import {SearchForSongs} from './components/screens/songSearch';
 import AudioScreen from './components/screens/AudioRecordings';
 import Account from './components/screens/AccountScreen';
-const Drawer = createDrawerNavigator();
+const Drawer = createDrawerNavigator(); //creates the drawer for side navigation
 
-navigationScreenOptions={
+navigationScreenOptions={ //navigation styles
   headerShown: true,
   headerStyle: styles.navHeader,
   headerTitleStyle: {
@@ -31,9 +31,8 @@ navigationScreenOptions={
 export default function App(){
   return (
     <NavigationContainer>
-      
       <Drawer.Navigator  drawerContent={props => <CustomDrawer {...props} />}
-      screenOptions={navigationScreenOptions} initialRouteName="Account"> 
+      screenOptions={navigationScreenOptions} initialRouteName="Account" /*Opens on the account screen first*/> 
         <Drawer.Screen name = "Events" component={ViewEvents} />
         <Drawer.Screen name="Account" component={Account} />
         <Drawer.Screen name ="Create Event" component={CreateEvent} />

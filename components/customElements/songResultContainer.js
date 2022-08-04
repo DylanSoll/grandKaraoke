@@ -6,10 +6,12 @@ export function SongContainer(props) {
   async function playSong(location) {
     //this logic prevents multiple songs from being played at once, and allows user to pause songs
     let oldSoundData = {} //creates a variable here to avoid scoping issue / object key issues
+    await Audio.setAudioModeAsync({playsInSilentModeIOS: true}); //play when phone is on silent
     const { sound } = await Audio.Sound.createAsync({uri: location}); //creates sound
     if (props.oldSound === undefined){
       //if there is no song
       props.updateSong(sound) //updates the song playing
+      sound.ion
       await sound.playAsync();// plays the new song 
     }else{
       oldSoundData = await props.oldSound?.getStatusAsync();//gets the data of the old song
