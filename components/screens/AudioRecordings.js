@@ -31,15 +31,15 @@ function NewRecording(props) {
       <TextInput style={[styles.input, { width: '95%', alignSelf: 'center' }]} value={name} onChangeText={text => {
         updateName(text)
       }} />
-      <TouchableOpacity onPress={()=>{props.source.replayAsync()}}>
+      <TouchableOpacity onPress={()=>{props.source.replayAsync()}/*ES6 arrow functions all for more control over functions*/}>
         <Text style={{ color: '#00a6ff', fontSize: 18, textAlign: 'center', margin: 5 }}>
-          Play for {formatTime(props.duration)}
+          Play for {formatTime(props.duration) /*Anything contained in {} will be treated as JavaScript*/}
         </Text>
       </TouchableOpacity>
       <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
         <TouchableOpacity style={{ backgroundColor: '#0075eb', paddingVertical: 2, paddingHorizontal: 7, marginRight: 5, borderRadius: 10 }}
           onPress={() => { Sharing.shareAsync(props.uri) }}>
-          <Text style={{ color: 'white', fontSize: 18, textAlign: 'center' }}>
+          <Text style={{ color: 'white', fontSize: 18, textAlign: 'center' } /*Styling similar to css*/}>
             Share
           </Text>
         </TouchableOpacity>
@@ -126,8 +126,8 @@ function OldRecording(props) {
   )
 }
 export default function AudioScreen({ navigation }) {
-  const [recordings, updateRecordings] = useState([])
-  const [oldRecordings, updateOldRecordings] = useState([])
+  const [recordings, updateRecordings] = useState([]) //use state stops the constants from being redefined every re-render
+  const [oldRecordings, updateOldRecordings] = useState([]) //page rerenders whenever page is touched, changed etc.
   function getAudio() {
     const handleGetAudioResponse = (response) => {
       //creates a function to handle the response from get audio
@@ -154,7 +154,7 @@ export default function AudioScreen({ navigation }) {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true, //settings required to record on IOS
         playsInSilentModeIOS: true,
-      });
+      });//await requires a response from the promise before moving on
       const { recording } = await Audio.Recording.createAsync(
         Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY// Creates recording in high quality
       );
@@ -260,7 +260,7 @@ export default function AudioScreen({ navigation }) {
           return (
             <OldRecording idNum={index + 1} duration={item?.duration} source={item?.sound} uri={item?.uri} name={item?.name}
               deleteFunction={() => {deleteFromDatabase(index, item.audioID)}}
-            />)
+            />) //The return (<OldRecording /> shows the function named OldRecording)
         }} />
       </View>
 

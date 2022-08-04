@@ -8,12 +8,12 @@ import { styles } from '../../static/styles/mainStyle';
 export default function CustomButton(props) {
   return (
     <TouchableOpacity 
-    style= {styles.button} 
+    style= {styles.button} //styles the button as a default
     onPress={props.onPress} 
-    activeOpacity = {0.5} 
-    disabled={props.disabled}>
+    activeOpacity = {0.5} //goes to half opacity when touched, and cant be pressed if disabled
+    disabled={props.disabled}> 
       <Text style={{fontSize:props.fontSize, color: 'white'}}>
-        {props.label}
+        {props.label/*The label of the button*/}
       
       </Text>
       

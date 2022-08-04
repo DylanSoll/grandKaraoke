@@ -1,24 +1,25 @@
 import React from 'react';
 import { Text, View, StyleSheet, Image, Dimensions} from 'react-native';
 import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import { Audio } from 'expo-av';
+import { Audio } from 'expo-av'; //audio used for playing snippets
 export function SongContainer(props) {
-  async function playSound(location) {
-    let oldSoundData = {}
-    const { sound } = await Audio.Sound.createAsync({uri: location});
+  async function playSong(location) {
+    //this logic prevents multiple songs from being played at once, and allows user to pause songs
+    let oldSoundData = {} //creates a variable here to avoid scoping issue / object key issues
+    const { sound } = await Audio.Sound.createAsync({uri: location}); //creates sound
     if (props.oldSound === undefined){
-      
-      props.updateSong(sound)
-      await sound.playAsync(); 
+      //if there is no song
+      props.updateSong(sound) //updates the song playing
+      await sound.playAsync();// plays the new song 
     }else{
-      oldSoundData = await props.oldSound?.getStatusAsync();
-      const newSoundData = await sound.getStatusAsync();
-      props.oldSound?.pauseAsync();
-      if (newSoundData.uri !== oldSoundData?.uri){
-        props.updateSong(sound)
+      oldSoundData = await props.oldSound?.getStatusAsync();//gets the data of the old song
+      const newSoundData = await sound.getStatusAsync(); // gets the data of current song
+      props.oldSound?.pauseAsync(); //pauses the old song
+      if (newSoundData.uri !== oldSoundData?.uri){ //if they aren't the same song
+        props.updateSong(sound) //plays new song, and updates it
         await sound.playAsync(); 
       }else if (oldSoundData.isPlaying === false){
-        props.oldSound.playAsync();
+        props.oldSound.playAsync(); //if it is not playing, play it (continue or restart)
     }
     }
 
@@ -42,9 +43,9 @@ export function SongContainer(props) {
         </View>
         <View style={styles.moreInfo} >
           <TouchableOpacity onPress={()=>{
-            playSound(props.previewURL)
+            playSong(props.previewURL) //plays the song, and associated logic
           }} disabled = {props.canPlay}>
-            <Text style={{color: 'white', fontSize: 30, top: '25%'}}>{'|>'} </Text>
+            <Text style={{color: 'white', fontSize: 30, top: '25%'}}>{'|>'/*Dodgy play/pause symbol */} </Text>
           </TouchableOpacity>
         </View>
 
@@ -52,7 +53,7 @@ export function SongContainer(props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create({ //styles uses throughout
   resultContainer: {
     position: "relative",
     width: Dimensions.get('window').width ,
