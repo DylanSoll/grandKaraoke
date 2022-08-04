@@ -9,10 +9,21 @@ import {
 } from '../../static/js/loginRegisterScripts'
 import CustomButton from '../customElements/customButton';
 function Login(props) {
-    const [email, updateEmail] = useState("")
-    const [password, updatePassword] = useState("")
-    const [validEmailState, updateEmailState] = useState('#353535')
-    const [validPasswordState, updatePasswordState] = useState('#353535')
+    const [email, updateEmail] = useState("");
+    const [password, updatePassword] = useState("");
+    const [validEmailState, updateEmailState] = useState('#353535');
+    const [validPasswordState, updatePasswordState] = useState('#353535');
+    const tryLoginResponseHandle = (result) => {
+        if (result === 'LOGGED IN'){ //if already logged in, go to events page
+            props.alreadyLoggedIn('Events');
+            return
+        }
+        alert('Login Failed \nTry Again') //if the function did not exit, login failed
+        return
+    }
+    const loginFunc = () => {
+        tryLogin(email, password, tryLoginResponseHandle);
+    }
     return (<ScrollView contentContainerStyle={{ justifyContent: "space-around" }}>
         <View style={{ alignSelf: 'center' }}>
             <Text style={[styles.text, { fontSize: 20 }]}>{"\n"}Email</Text>
@@ -34,16 +45,7 @@ function Login(props) {
         }}
             secureTextEntry={true} />
 
-        <CustomButton onPress={() => (tryLogin(email, password, (result)=>{
-            if (result === 'LOGGED IN'){
-                props.alreadyLoggedIn('Events');
-                return
-            }else if (result === false){
-                alert('Login Failed \nTry Again')
-                return
-            }
-             
-        }))} label={"Login"} fontSize={22.5} />
+        <CustomButton onPress={loginFunc} label={"Login"} fontSize={22.5} />
         <CustomButton onPress={props.registerInstead} label={"Register Instead"} fontSize={15} />
 
 

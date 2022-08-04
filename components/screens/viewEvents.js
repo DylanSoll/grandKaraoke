@@ -670,31 +670,3 @@ export function ViewEvents({ navigation }) {
 
   )
 }
-
-
-/*
-const degreesPerKmLat = 0.00904371732;
-function getDegreesPerKmLong(latitude){
-  const kmsPerDegreeLong = 111.320 * Math.cos(latitude/180)
-  return 1 / kmsPerDegreeLong;
-}
-function findMinMaxDegrees(lat, long, numKm){
-  const degreesPerKmLong = getDegreesPerKmLong(lat);
-  const latBounds = [lat - degreesPerKmLat * numKm, lat + degreesPerKmLat * numKm];
-  const longBounds = [long - degreesPerKmLong * numKm, long + degreesPerKmLong * numKm];
-  return {'lat':latBounds, 'long': longBounds}
-}
-function createQuery(boundsObj){
-  const lat = boundsObj.lat;
-  const long = boundsObj.long;
-  const currentTimeMs = new Date().getTime();
-  const currentTime = Math.floor(currentTimeMs/1000);
-  const query = `SELECT * FROM events
-WHERE latitude > ${lat[0]} and latitude < ${lat[1]}
-AND longitude > ${long[0]} and longitude < ${long[1]}
-AND startTime > ${currentTime}
-ORDER BY startTime ASC`;
-  return query
-}
-
-*/
